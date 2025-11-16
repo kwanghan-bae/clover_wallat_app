@@ -1,5 +1,12 @@
 # Clover Lotto 통합 앱 기획서
 
+### 0. 프로젝트 경로
+
+*   **Flutter 앱 (클라이언트):** `/Users/joel/Desktop/git/clover_wallet_app`
+*   **Kotlin 서버 (백엔드):** `/Users/joel/Desktop/git/clover-wallet`
+
+---
+
 ### 1. 앱 개요
 
 **목표:** `clover-wallet`의 안정적인 지갑 관리 기능을 기반으로, 로또 구매 및 당첨 경험을 혁신하고 사용자에게 즐거움을 제공하는 통합 로또 관리 및 커뮤니티 앱을 구축합니다. 로또 번호 추첨부터 당첨 확인, 명당 탐색, 그리고 사용자 간의 소통까지 로또와 관련된 모든 활동을 하나의 앱에서 편리하게 관리할 수 있도록 합니다.
@@ -52,26 +59,28 @@
 ### 3. 기술 스택
 
 *   **프론트엔드 (모바일 앱):** Flutter (Dart)
-    *   크로스 플랫폼 지원 (iOS, Android)
-    *   반응형 UI 및 뛰어난 성능
-    *   상태 관리: Provider, Riverpod 또는 BLoC 패턴
-    *   HTTP 통신: `http` 패키지 또는 `Dio`
-    *   OCR: Google ML Kit 또는 외부 OCR API 연동
-    *   지도: `google_maps_flutter` 또는 `flutter_naver_map`
-    *   푸시 알림: Firebase Cloud Messaging (FCM)
+    *   **경로:** `clover_wallet_app`
+    *   **주요 라이브러리:**
+        *   HTTP 통신: `http`
+        *   로컬 데이터 저장: `shared_preferences`
+    *   **상태 관리:** Provider, Riverpod 또는 BLoC 패턴 (현재는 `setState` 위주)
+    *   **향후 도입 예정:**
+        *   OCR: Google ML Kit 또는 외부 OCR API 연동
+        *   지도: `google_maps_flutter` 또는 `flutter_naver_map`
+        *   푸시 알림: Firebase Cloud Messaging (FCM)
 
-*   **백엔드 (API 서버):** Kotlin with Spring Boot (WebFlux)
-    *   `clover-wallet` 프로젝트의 기존 API 활용 및 확장
-    *   RESTful API 설계 및 구현
-    *   데이터베이스 연동: RDB (PostgreSQL, MySQL 등) 또는 NoSQL (MongoDB 등)
-    *   웹 스크래핑: Jsoup (Kotlin) 또는 Selenium
-    *   위치 기반 서비스: Geo-spatial 쿼리 지원 데이터베이스 및 외부 지도 API 연동
-    *   푸시 알림 연동: FCM 서버 SDK
-    *   추천 시스템: 간단한 규칙 기반 또는 머신러닝 라이브러리 (Kotlin)
+*   **백엔드 (API 서버):** Kotlin with Spring Boot
+    *   **경로:** `clover-wallet`
+    *   **프레임워크:** Spring Boot, Spring MVC, Spring Data JPA
+    *   **구조:** `domain`, `app`(application), `infra`(rdb, web-adapter) 등 모듈로 분리된 멀티모듈 아키텍처
+    *   **웹 스크래핑:** Jsoup (Kotlin) 또는 Selenium
+    *   **위치 기반 서비스:** Geo-spatial 쿼리 지원 데이터베이스 및 외부 지도 API 연동
+    *   **푸시 알림 연동:** FCM 서버 SDK
 
 *   **데이터베이스:**
-    *   사용자 정보, 로또 구매 내역, 번호 조합, 명당 정보, 커뮤니티 게시물 등 저장.
-    *   `clover-wallet` 프로젝트에서 사용하는 DB를 따르거나, 필요시 확장.
+    *   **개발용:** H2 (In-memory)
+    *   **운영용:** RDB (PostgreSQL, MySQL 등)
+    *   **저장 데이터:** 사용자 정보, 로또 구매 내역, 번호 조합, 명당 정보, 커뮤니티 게시물 등
 
 *   **인프라:**
     *   클라우드 플랫폼: AWS, GCP, Azure 등
@@ -80,25 +89,25 @@
 ### 4. 시스템 아키텍처 (고수준)
 
 ```
-+-------------------+       +-------------------+       +-------------------+
-|   Flutter Client  | <---> |   Backend API     | <---> |    Database       |
-| (iOS/Android App) |       | (Kotlin/Spring)   |       |                   |
-+-------------------+       +-------------------+       +-------------------+
-         ^                           ^     ^     ^
-         |                           |     |     |
-         |                           |     |     +------------------------+
-         |                           |     |                              |
-         |                           |     +-------------------+          |
-         |                           |                         |          |
-+-----------------------+   +-----------------------+   +-----------------------+
-| Firebase Cloud        |   | Lotto Official        |   | Location/Map Services |
-| Messaging (FCM)       |   | Website (Scraping)    |   | (e.g., Google Maps)   |
-+-----------------------+   +-----------------------+   +-----------------------+
++-------------------+       +--------------------------------+       +-------------------+
+|   Flutter Client  | <---> |   Backend API (Kotlin/Spring)  | <---> |    Database       |
+| (iOS/Android App) |       | (app, domain, infra modules)   |       |  (H2 / PostgreSQL)|
++-------------------+       +--------------------------------+       +-------------------+
+         ^                           ^           ^           ^
+         |                           |           |           |
+         |                           |           |           +------------------------+
+         |                           |           |                                    |
+         |                           |           +-------------------+                |
+         |                           |                               |                |
++-----------------------+   +-----------------------+   +------------------------------+
+| Firebase Cloud        |   | Lotto Official        |   | Location/Map Services        |
+| Messaging (FCM)       |   | Website (Scraping)    |   | (e.g., Google Maps)          |
++-----------------------+   +-----------------------+   +------------------------------+
 ```
 
 *   **Flutter Client:** 사용자 인터페이스 및 사용자 경험을 담당하며, 백엔드 API와 통신하여 데이터를 주고받습니다. FCM을 통해 푸시 알림을 수신합니다.
-*   **Backend API (Kotlin/Spring):** `clover-wallet`의 핵심 로직을 포함하며, 로또 번호 생성, 내역 관리, 명당 정보 제공, 당첨 확인 로직, 커뮤니티 기능 등을 처리합니다. 외부 서비스(로또 공식 홈페이지, 지도 서비스, FCM)와 연동합니다.
-*   **Database:** 모든 애플리케이션 데이터를 저장하고 관리합니다.
+*   **Backend API (Kotlin/Spring):** `clover-wallet`의 핵심 로직을 포함하며, 멀티모듈(app, domain, infra) 구조로 역할을 분리합니다. 로또 번호 생성, 내역 관리, 명당 정보 제공, 당첨 확인 로직, 커뮤니티 기능 등을 처리하며 외부 서비스(로또 공식 홈페이지, 지도 서비스, FCM)와 연동합니다.
+*   **Database:** 모든 애플리케이션 데이터를 저장하고 관리합니다. 개발 시에는 H2, 운영 환경에서는 PostgreSQL 등을 사용합니다.
 *   **Firebase Cloud Messaging (FCM):** 푸시 알림 전송을 위한 서비스입니다.
 *   **Lotto Official Website:** 당첨 번호 및 관련 정보를 스크래핑하여 당첨 확인 및 고지에 활용합니다.
 *   **Location/Map Services:** 로또 명당 검색 및 여행 플랜 추천을 위한 지도 및 위치 정보를 제공합니다.
