@@ -7,8 +7,8 @@ class LottoApiService {
   // For iOS Simulator, 'localhost' or '127.0.0.1' works directly.
   final String _baseUrl = 'http://127.0.0.1:8080';
 
-  Future<LottoWinnings> checkWinnings() async {
-    final response = await http.get(Uri.parse('$_baseUrl/v1/lotto/check-winnings'));
+  Future<LottoWinnings> checkWinnings({required int userId}) async {
+    final response = await http.get(Uri.parse('$_baseUrl/v1/lotto/check-winnings?userId=$userId'));
 
     if (response.statusCode == 200) {
       // The response body is likely UTF-8 encoded.

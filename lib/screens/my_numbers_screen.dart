@@ -55,7 +55,7 @@ class _MyNumbersScreenState extends State<MyNumbersScreen> {
 
   void _checkWinnings() {
     setState(() {
-      _winningsFuture = LottoApiService().checkWinnings();
+      _winningsFuture = LottoApiService().checkWinnings(userId: 1); // Hardcoded user ID for now
     });
   }
 
