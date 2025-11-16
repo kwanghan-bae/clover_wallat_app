@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:clover_wallet_app/models/lotto_winnings.dart';
 import 'package:clover_wallet_app/services/lotto_api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class MyNumbersScreen extends StatefulWidget {
   const MyNumbersScreen({super.key});
@@ -15,8 +17,14 @@ class _MyNumbersScreenState extends State<MyNumbersScreen> {
       List.generate(6, (_) => TextEditingController());
   final TextEditingController _roundController = TextEditingController();
 
-  final List<Map<String, dynamic>> _savedNumbers = [];
+  List<Map<String, dynamic>> _savedNumbers = [];
   Future<LottoWinnings>? _winningsFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSavedNumbers();
+  }
 
   @override
   void dispose() {
@@ -25,6 +33,24 @@ class _MyNumbersScreenState extends State<MyNumbersScreen> {
     }
     _roundController.dispose();
     super.dispose();
+  }
+
+  Future<void> _loadSavedNumbers() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? numbersString = prefs.getString('savedLottoNumbers');
+    if (numbersString != null) {
+      setState(() {
+        _savedNumbers = (jsonDecode(numbersString) as List)
+            .map((item) => Map<String, dynamic>.from(item))
+            .toList();
+      });
+    }
+  }
+
+  Future<void> _saveNumbersToPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String numbersString = jsonEncode(_savedNumbers);
+    await prefs.setString('savedLottoNumbers', numbersString);
   }
 
   void _saveNumbers() {
@@ -40,6 +66,8 @@ class _MyNumbersScreenState extends State<MyNumbersScreen> {
           'numbers': numbers..sort(),
         });
       });
+
+      _saveNumbersToPrefs(); // Save to preferences
 
       for (var controller in _numberControllers) {
         controller.clear();
