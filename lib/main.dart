@@ -1,11 +1,28 @@
+import 'package:clover_wallet_app/services/community_api_service.dart';
+import 'package:clover_wallet_app/viewmodels/community_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:clover_wallet_app/screens/home_screen.dart';
 import 'package:clover_wallet_app/screens/my_numbers_screen.dart';
 import 'package:clover_wallet_app/screens/lucky_spots_screen.dart';
 import 'package:clover_wallet_app/screens/community_screen.dart';
+import 'package:provider/provider.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        Provider<CommunityApiService>(
+          create: (_) => CommunityApiService(),
+        ),
+        ChangeNotifierProvider<CommunityViewModel>(
+          create: (context) => CommunityViewModel(
+            apiService: context.read<CommunityApiService>(),
+          ),
+        ),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
