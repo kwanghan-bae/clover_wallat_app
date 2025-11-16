@@ -1,4 +1,5 @@
 import 'package:clover_wallet_app/screens/create_post_screen.dart';
+import 'package:clover_wallet_app/screens/post_detail_screen.dart';
 import 'package:clover_wallet_app/viewmodels/community_viewmodel.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -67,7 +68,11 @@ class _CommunityScreenState extends State<CommunityScreen> {
                           : '',
                     ),
                     onTap: () {
-                      // TODO: Navigate to post detail screen
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (context) => PostDetailScreen(post: post),
+                        ),
+                      );
                     },
                   ),
                 );
