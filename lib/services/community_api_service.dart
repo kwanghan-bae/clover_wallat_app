@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:clover_wallet_app/models/comment.dart';
 import 'package:clover_wallet_app/models/post.dart';
 import 'package:http/http.dart' as http;
 
@@ -76,6 +77,75 @@ class CommunityApiService {
 
     if (response.statusCode != 204) { // No Content
       throw Exception('Failed to delete post.');
+    }
+  }
+
+  Future<List<Comment>> getCommentsForPost({required int postId}) async {
+    final response = await _client.get(Uri.parse('$_baseUrl/v1/community/posts/$postId/comments'));
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonData = jsonDecode(utf8.decode(response.bodyBytes));
+      return jsonData.map((json) => Comment.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load comments');
+    }
+  }
+
+  Future<Comment> createComment({
+    required int postId,
+    required int userId,
+    required String content,
+  }) async {
+    final response = await _client.post(
+      Uri.parse('$_baseUrl/v1/community/posts/$postId/comments'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'postId': postId,
+        'userId': userId,
+        'content': content,
+      }),
+    );
+
+    if (response.statusCode == 201) { // Created
+      return Comment.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
+    } else {
+      throw Exception('Failed to create comment.');
+    }
+  }
+
+  Future<Comment> updateComment({
+    required int commentId,
+    required String content,
+  }) async {
+    final response = await _client.put(
+      Uri.parse('$_baseUrl/v1/community/comments/$commentId'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'content': content,
+      }),
+    );
+
+    if (response.statusCode == 200) { // OK
+      return Comment.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
+    } else {
+      throw Exception('Failed to update comment.');
+    }
+  }
+
+  Future<void> deleteComment({required int commentId}) async {
+    final response = await _client.delete(
+      Uri.parse('$_baseUrl/v1/community/comments/$commentId'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    if (response.statusCode != 204) { // No Content
+      throw Exception('Failed to delete comment.');
     }
   }
 }
