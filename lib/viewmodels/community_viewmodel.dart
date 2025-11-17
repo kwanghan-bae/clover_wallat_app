@@ -57,4 +57,48 @@ class CommunityViewModel extends ChangeNotifier {
       notifyListeners();
     }
   }
+
+  Future<bool> updatePost({
+    required int postId,
+    required String title,
+    required String content,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _apiService.updatePost(
+        postId: postId,
+        title: title,
+        content: content,
+      );
+      await fetchPosts(); // Refresh the list after update
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<bool> deletePost({required int postId}) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      await _apiService.deletePost(postId: postId);
+      await fetchPosts(); // Refresh the list after delete
+      return true;
+    } catch (e) {
+      _errorMessage = e.toString();
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

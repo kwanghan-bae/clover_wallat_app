@@ -42,4 +42,40 @@ class CommunityApiService {
       throw Exception('Failed to create post.');
     }
   }
+
+  Future<Post> updatePost({
+    required int postId,
+    required String title,
+    required String content,
+  }) async {
+    final response = await _client.put(
+      Uri.parse('$_baseUrl/v1/community/posts/$postId'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'title': title,
+        'content': content,
+      }),
+    );
+
+    if (response.statusCode == 200) { // OK
+      return Post.fromJson(jsonDecode(utf8.decode(response.bodyBytes)));
+    } else {
+      throw Exception('Failed to update post.');
+    }
+  }
+
+  Future<void> deletePost({required int postId}) async {
+    final response = await _client.delete(
+      Uri.parse('$_baseUrl/v1/community/posts/$postId'),
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+    );
+
+    if (response.statusCode != 204) { // No Content
+      throw Exception('Failed to delete post.');
+    }
+  }
 }
