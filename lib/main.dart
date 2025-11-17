@@ -6,6 +6,8 @@ import 'package:clover_wallet_app/screens/my_numbers_screen.dart';
 import 'package:clover_wallet_app/screens/lucky_spots_screen.dart';
 import 'package:clover_wallet_app/screens/community_screen.dart';
 import 'package:provider/provider.dart';
+import 'package:clover_wallet_app/services/lotto_spot_api_service.dart'; // New import
+import 'package:clover_wallet_app/viewmodels/lotto_spot_viewmodel.dart'; // New import
 
 void main() {
   runApp(
@@ -17,6 +19,14 @@ void main() {
         ChangeNotifierProvider<CommunityViewModel>(
           create: (context) => CommunityViewModel(
             apiService: context.read<CommunityApiService>(),
+          ),
+        ),
+        Provider<LottoSpotApiService>( // New provider
+          create: (_) => LottoSpotApiService(),
+        ),
+        ChangeNotifierProvider<LottoSpotViewModel>(
+          create: (context) => LottoSpotViewModel(
+            apiService: context.read<LottoSpotApiService>(), // Use the new service
           ),
         ),
       ],
