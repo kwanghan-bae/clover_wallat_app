@@ -1,5 +1,9 @@
-import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:clover_wallet_app/screens/history_screen.dart';
+import 'package:clover_wallet_app/screens/hotspot_screen.dart';
+import 'package:clover_wallet_app/screens/community_screen.dart';
+import 'package:clover_wallet_app/screens/mypage_screen.dart';
+import 'package:clover_wallet_app/screens/number_generation_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -9,107 +13,146 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  List<int> _generatedNumbers = [];
+  int _selectedIndex = 0;
 
-  void _generateNumbers() {
-    final random = Random();
-    final Set<int> uniqueNumbers = {};
-    while (uniqueNumbers.length < 6) {
-      uniqueNumbers.add(random.nextInt(45) + 1);
-    }
+  final List<Widget> _screens = [
+    const DashboardTab(),
+    const HistoryScreen(), // My Lotto
+    const HotspotScreen(), // Hotspots
+    const CommunityScreen(), // Community
+    const MyPageScreen(), // My Page
+  ];
+
+  void _onItemTapped(int index) {
     setState(() {
-      _generatedNumbers = uniqueNumbers.toList()..sort();
+      _selectedIndex = index;
     });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Padding(
+      body: _screens[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        items: const <BottomNavigationBarItem>[
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: '홈'),
+          BottomNavigationBarItem(icon: Icon(Icons.receipt_long), label: '내 로또'),
+          BottomNavigationBarItem(icon: Icon(Icons.location_on), label: '명당'),
+          BottomNavigationBarItem(icon: Icon(Icons.people), label: '커뮤니티'),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: '마이페이지'),
+        ],
+        currentIndex: _selectedIndex,
+        selectedItemColor: Theme.of(context).primaryColor,
+        unselectedItemColor: Colors.grey,
+        type: BottomNavigationBarType.fixed,
+        onTap: _onItemTapped,
+      ),
+      floatingActionButton: _selectedIndex == 0
+          ? FloatingActionButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => const NumberGenerationScreen()),
+                );
+              },
+              tooltip: '로또 번호 추첨',
+              child: const Icon(Icons.add),
+            )
+          : null,
+    );
+  }
+}
+
+class DashboardTab extends StatelessWidget {
+  const DashboardTab({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Clover Lotto'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications),
+            onPressed: () {},
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              '오늘의 행운 번호',
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 20),
-            if (_generatedNumbers.isNotEmpty)
-              Card(
-                elevation: 4,
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: [
-                      const Text(
-                        '생성된 번호',
-                        style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                        children: _generatedNumbers
-                            .map((number) => _buildNumberCircle(number))
-                            .toList(),
-                      ),
-                    ],
-                  ),
+            // Next Draw Info Card
+            Card(
+              color: Theme.of(context).primaryColor,
+              child: const Padding(
+                padding: EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    Text(
+                      '제 1100 회',
+                      style: TextStyle(color: Colors.white, fontSize: 18),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      '당첨 발표까지',
+                      style: TextStyle(color: Colors.white70),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      '3일 12시간 30분',
+                      style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 ),
               ),
-            const Spacer(),
-            ElevatedButton(
-              onPressed: _generateNumbers,
-              style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                backgroundColor: Colors.green,
-                foregroundColor: Colors.white,
-              ),
-              child: const Text(
-                '번호 생성',
-                style: TextStyle(fontSize: 18),
-              ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
+            
+            // Quick Actions
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildQuickAction(context, Icons.casino, '번호 추첨', () {
+                   Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const NumberGenerationScreen()),
+                  );
+                }),
+                _buildQuickAction(context, Icons.qr_code_scanner, 'QR 스캔', () {}),
+                _buildQuickAction(context, Icons.map, '명당 찾기', () {
+                   // Switch to Hotspot tab? Or navigate?
+                   // For now, let's just print
+                   // print('Navigate to Hotspot');
+                }),
+              ],
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildNumberCircle(int number) {
-    return Container(
-      width: 40,
-      height: 40,
-      decoration: BoxDecoration(
-        color: _getNumberColor(number),
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Text(
-          number.toString(),
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
+  Widget _buildQuickAction(BuildContext context, IconData icon, String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          CircleAvatar(
+            radius: 24,
+            backgroundColor: Theme.of(context).colorScheme.secondary,
+            child: Icon(icon, color: Colors.white),
           ),
-        ),
+          const SizedBox(height: 8),
+          Text(label, style: const TextStyle(fontWeight: FontWeight.bold)),
+        ],
       ),
     );
-  }
-
-  Color _getNumberColor(int number) {
-    if (number <= 10) {
-      return Colors.orange;
-    } else if (number <= 20) {
-      return Colors.blue;
-    } else if (number <= 30) {
-      return Colors.red;
-    } else if (number <= 40) {
-      return Colors.grey;
-    } else {
-      return Colors.green;
-    }
   }
 }
