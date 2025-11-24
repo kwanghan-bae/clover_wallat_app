@@ -64,6 +64,38 @@ class HistoryScreen extends StatelessWidget {
                       ],
                     ),
                     isThreeLine: true,
+                    trailing: item.isChecked
+                        ? Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.end,
+                            children: [
+                              Text(
+                                item.rank > 0 ? '${item.rank}등 당첨!' : '낙첨',
+                                style: TextStyle(
+                                  color: item.rank > 0 ? Colors.red : Colors.grey,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                              if (item.rank > 0)
+                                Text(
+                                  '₩${NumberFormat('#,###').format(item.prize)}',
+                                  style: const TextStyle(
+                                    color: Colors.amber,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                            ],
+                          )
+                        : ElevatedButton(
+                            onPressed: () {
+                              viewModel.checkEntry(index);
+                            },
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              minimumSize: const Size(60, 30),
+                            ),
+                            child: const Text('확인'),
+                          ),
                   ),
                 ),
               );
