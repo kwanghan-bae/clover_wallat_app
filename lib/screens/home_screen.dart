@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:clover_wallet_app/screens/history_screen.dart';
 import 'package:clover_wallet_app/screens/hotspot_screen.dart';
+import 'package:clover_wallet_app/screens/qr_scan_screen.dart';
+import 'package:clover_wallet_app/screens/statistics_screen.dart';
 import 'package:clover_wallet_app/screens/community_screen.dart';
 import 'package:clover_wallet_app/screens/mypage_screen.dart';
 import 'package:clover_wallet_app/screens/number_generation_screen.dart';
@@ -49,11 +51,10 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       floatingActionButton: _selectedIndex == 0
           ? FloatingActionButton(
-              onPressed: () {
+              onPressed: () { // Changed from onTap to onPressed
                 Navigator.push(
                   context,
-                  MaterialPageRoute(
-                      builder: (context) => const NumberGenerationScreen()),
+                  MaterialPageRoute(builder: (context) => const QrScanScreen()), // Changed target screen
                 );
               },
               tooltip: '로또 번호 추첨',
@@ -125,7 +126,20 @@ class DashboardTab extends StatelessWidget {
                         builder: (context) => const NumberGenerationScreen()),
                   );
                 }),
-                _buildQuickAction(context, Icons.qr_code_scanner, 'QR 스캔', () {}),
+                _buildQuickAction(context, Icons.qr_code_scanner, 'QR 스캔', () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const QrScanScreen()),
+                  );
+                }),
+                _buildQuickAction(context, Icons.analytics, '번호 분석', () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => const StatisticsScreen()),
+                  );
+                }),
                 _buildQuickAction(context, Icons.map, '명당 찾기', () {
                    // Switch to Hotspot tab? Or navigate?
                    // For now, let's just print

@@ -8,6 +8,7 @@ import 'package:clover_wallet_app/services/lotto_spot_api_service.dart';
 import 'package:clover_wallet_app/viewmodels/lotto_spot_viewmodel.dart';
 import 'package:clover_wallet_app/viewmodels/history_viewmodel.dart';
 import 'package:clover_wallet_app/services/winning_check_service.dart';
+import 'package:clover_wallet_app/viewmodels/statistics_viewmodel.dart';
 
 void main() {
   runApp(
@@ -35,6 +36,11 @@ void main() {
         ChangeNotifierProvider<HistoryViewModel>(
           create: (context) => HistoryViewModel(
             winningCheckService: context.read<WinningCheckService>(),
+          ),
+        ),
+        ChangeNotifierProvider<StatisticsViewModel>(
+          create: (context) => StatisticsViewModel(
+            historyViewModel: context.read<HistoryViewModel>(),
           ),
         ),
       ],
