@@ -49,7 +49,7 @@ class CommunityScreen extends StatelessWidget {
                       Row(
                         children: [
                           Text(
-                            post.author,
+                            post.author ?? 'Anonymous',
                             style: TextStyle(
                                 fontSize: 12, color: Colors.grey[600]),
                           ),

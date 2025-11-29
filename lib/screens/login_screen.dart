@@ -44,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CloverTheme.background,
+      backgroundColor: CloverTheme.backgroundColor,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
@@ -54,13 +54,13 @@ class _LoginScreenState extends State<LoginScreen> {
               const Icon(
                 Icons.account_balance_wallet,
                 size: 80,
-                color: CloverTheme.primary,
+                color: CloverTheme.primaryColor,
               ),
               const SizedBox(height: 24),
               Text(
                 'Clover Wallet',
                 style: Theme.of(context).textTheme.headlineLarge?.copyWith(
-                      color: CloverTheme.onBackground,
+                      color: CloverTheme.textDark,
                       fontWeight: FontWeight.bold,
                     ),
               ),

@@ -32,7 +32,7 @@ class CommunityViewModel extends ChangeNotifier {
 
   Future<void> addPost(String title, String content) async {
     try {
-      final newPost = await _apiService.createPost(title, content, 'User'); // Hardcoded author for now
+      final newPost = await _apiService.createPost(title, content);
       _posts.insert(0, newPost);
       notifyListeners();
     } catch (e) {
