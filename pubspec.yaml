@@ -44,6 +44,8 @@ dependencies:
   flutter_native_ocr: ^0.1.0
   google_fonts: ^6.3.2
   mobile_scanner: ^7.1.3
+  google_sign_in: ^6.2.1
+  supabase_flutter: ^2.5.0
 
 dev_dependencies:
   flutter_test:

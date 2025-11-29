@@ -16,7 +16,9 @@ class ApiConfig {
     return 'http://localhost:8080';
   }
 
-  static const String communityPrefix = '/v1/community';
-  static const String lottoSpotPrefix = '/v1/lotto-spots';
-  static const String lottoPrefix = '/v1/lotto';
+  static const String communityPrefix = '/api/v1/community';
+  static const String lottoSpotPrefix = '/api/v1/lotto-spots';
+  static const String lottoPrefix = '/api/v1/lotto';
+  static const String authPrefix = '/api/v1/auth';
+  static const String ticketPrefix = '/api/v1/tickets';
 }

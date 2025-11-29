@@ -10,7 +10,17 @@ import 'package:clover_wallet_app/viewmodels/history_viewmodel.dart';
 import 'package:clover_wallet_app/services/winning_check_service.dart';
 import 'package:clover_wallet_app/viewmodels/statistics_viewmodel.dart';
 
-void main() {
+import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:clover_wallet_app/screens/login_screen.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: 'https://jxyqgkekjidadocrvbcn.supabase.co',
+    anonKey: 'sb_publishable_xeGYwBzLsfMVstSqv35SHA_5Qw2kOEx',
+  );
+
   runApp(
     MultiProvider(
       providers: [
@@ -57,7 +67,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Clover Lotto',
       theme: CloverTheme.themeData,
-      home: const HomeScreen(),
+      home: Supabase.instance.client.auth.currentUser == null
+          ? const LoginScreen()
+          : const HomeScreen(),
     );
   }
 }

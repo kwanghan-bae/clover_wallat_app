@@ -1,10 +1,10 @@
 import 'dart:convert';
 
 class PostModel {
-  final String id;
+  final int id;
   final String title;
   final String content;
-  final String author;
+  final String? author; // Made nullable as it might not be in response
   final DateTime createdAt;
   final int likes;
   final int comments;
@@ -13,7 +13,7 @@ class PostModel {
     required this.id,
     required this.title,
     required this.content,
-    required this.author,
+    this.author,
     required this.createdAt,
     this.likes = 0,
     this.comments = 0,
@@ -33,13 +33,13 @@ class PostModel {
 
   factory PostModel.fromMap(Map<String, dynamic> map) {
     return PostModel(
-      id: map['id'],
-      title: map['title'],
-      content: map['content'],
-      author: map['author'],
-      createdAt: DateTime.parse(map['createdAt']),
-      likes: map['likes'],
-      comments: map['comments'],
+      id: map['id'] is int ? map['id'] : int.parse(map['id'].toString()),
+      title: map['title'] ?? '',
+      content: map['content'] ?? '',
+      author: map['author'], // Can be null
+      createdAt: map['createdAt'] != null ? DateTime.parse(map['createdAt']) : DateTime.now(),
+      likes: map['likes'] ?? 0,
+      comments: map['comments'] ?? 0,
     );
   }
 
