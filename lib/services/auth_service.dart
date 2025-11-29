@@ -14,7 +14,7 @@ class AuthService {
       // 1. Google Sign In
       final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
       if (googleUser == null) {
-        throw 'Google Sign-In aborted.';
+        throw Exception('Google Sign-In was cancelled by user');
       }
 
       // 2. Get Auth Details
@@ -23,10 +23,10 @@ class AuthService {
       final idToken = googleAuth.idToken;
 
       if (accessToken == null) {
-        throw 'No Access Token found.';
+        throw Exception('No Access Token found from Google Sign-In');
       }
       if (idToken == null) {
-        throw 'No ID Token found.';
+        throw Exception('No ID Token found from Google Sign-In');
       }
 
       // 3. Supabase Sign In
@@ -37,14 +37,19 @@ class AuthService {
       );
 
       // 4. Backend Sync
-      if (authResponse.session != null) {
-        await _syncWithBackend(authResponse.session!.accessToken);
+      final session = authResponse.session;
+      if (session != null && session.accessToken.isNotEmpty) {
+        await _syncWithBackend(session.accessToken);
+      } else {
+        if (kDebugMode) {
+          print('Warning: No session returned from Supabase');
+        }
       }
 
       return authResponse;
     } catch (e) {
       if (kDebugMode) {
-        print('Google Sign-In Error: $e');
+        print('Google Sign-In Error Details: $e');
       }
       rethrow;
     }
