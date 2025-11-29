@@ -44,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: CloverTheme.backgroundColor,
+      backgroundColor: CloverTheme.backgroundLight,
       body: Center(
         child: Padding(
           padding: const EdgeInsets.all(24.0),
