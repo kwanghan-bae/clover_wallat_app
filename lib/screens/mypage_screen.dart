@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:clover_wallet_app/utils/theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:clover_wallet_app/screens/notification_settings_screen.dart';
+import 'package:clover_wallet_app/services/user_stats_service.dart';
 
 class MyPageScreen extends StatelessWidget {
   const MyPageScreen({super.key});
@@ -144,17 +145,50 @@ class MyPageScreen extends StatelessWidget {
   }
 
   Widget _buildStatsGrid() {
-    return Row(
-      children: [
-        Expanded(
-          child: _buildStatCard('총 당첨금', '₩ 50,000', Colors.green),
-        ),
-        const SizedBox(width: 16),
-        Expanded(
-          child: _buildStatCard('수익률', '+120%', Colors.red),
-        ),
-      ],
+    return FutureBuilder<Map<String, dynamic>>(
+      future: UserStatsService().getUserStats(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return Row(
+            children: [
+              Expanded(child: _buildStatCard('총 당첨금', '로딩중...', Colors.green)),
+              const SizedBox(width: 16),
+              Expanded(child: _buildStatCard('수익률', '로딩중...', Colors.red)),
+            ],
+          );
+        }
+
+        final stats = snapshot.data!;
+        final totalWinnings = stats['totalWinnings'] as int;
+        final roi = stats['roi'] as int;
+
+        return Row(
+          children: [
+            Expanded(
+              child: _buildStatCard(
+                '총 당첨금',
+                '₩ ${_formatCurrency(totalWinnings)}',
+                Colors.green,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: _buildStatCard('수익률', '${roi >= 0 ? '+' : ''}$roi%', roi >= 0 ? Colors.green : Colors.red),
+            ),
+          ],
+        );
+      },
     );
+  }
+
+  String _formatCurrency(int amount) {
+    if (amount >= 100000000) {
+      return '${(amount / 100000000).toStringAsFixed(1)}억';
+    } else if (amount >= 10000) {
+      return '${(amount / 10000).toStringAsFixed(0)}만';
+    } else {
+      return amount.toString();
+    }
   }
 
   Widget _buildStatCard(String label, String value, Color color) {

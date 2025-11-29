@@ -1,0 +1,35 @@
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:clover_wallet_app/utils/api_config.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
+
+class UserStatsService {
+  Future<Map<String, dynamic>> getUserStats() async {
+    final user = Supabase.instance.client.auth.currentUser;
+    if (user == null) {
+      throw Exception('User not logged in');
+    }
+
+    // Get user ID from preferences or API
+    // For now, using a placeholder userId
+    final userId = 1;
+
+    final url = Uri.parse('${ApiConfig.baseUrl}/api/v1/users/$userId/stats');
+    final session = Supabase.instance.client.auth.currentSession;
+    final token = session?.accessToken;
+
+    final response = await http.get(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return json.decode(response.body) as Map<String, dynamic>;
+    } else {
+      throw Exception('Failed to load stats');
+    }
+  }
+}

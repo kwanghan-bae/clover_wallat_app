@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:clover_wallet_app/utils/theme.dart';
+import 'package:clover_wallet_app/services/number_extraction_service.dart';
 import 'dart:math';
 
 class NumberGenerationScreen extends StatefulWidget {
@@ -29,12 +30,28 @@ class _NumberGenerationScreenState extends State<NumberGenerationScreen> with Si
     super.dispose();
   }
 
-  void _generateNumbers(String method) {
+  void _generateNumbers(String method) async {
     setState(() {
       _selectedMethod = method;
-      _generatedNumbers = _generateByMethod(method);
-      _animationController.forward(from: 0);
+      _generatedNumbers = [];  // Clear while loading
     });
+
+    try {
+      // Try backend API first
+      final service = NumberExtractionService();
+      final numbers = await service.extractNumbers(method);
+      setState(() {
+        _generatedNumbers = numbers;
+        _animationController.forward(from: 0);
+      });
+    } catch (e) {
+      // Fallback to local generation
+      final numbers = _generateByMethod(method);
+      setState(() {
+        _generatedNumbers = numbers;
+        _animationController.forward(from: 0);
+      });
+    }
   }
 
   List<int> _generateByMethod(String method) {
