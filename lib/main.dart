@@ -13,6 +13,8 @@ import 'package:clover_wallet_app/viewmodels/statistics_viewmodel.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:clover_wallet_app/screens/login_screen.dart';
 
+import 'package:clover_wallet_app/services/auth_service.dart';
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -59,17 +61,51 @@ void main() async {
   );
 }
 
-class MyApp extends StatelessWidget {
+class MyApp extends StatefulWidget {
   const MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  @override
+  void initState() {
+    super.initState();
+    _setupAuthListener();
+  }
+
+  void _setupAuthListener() {
+    Supabase.instance.client.auth.onAuthStateChange.listen((data) {
+      final session = data.session;
+      if (session != null) {
+        // Sync with backend when session is established (e.g. after redirect login)
+        _syncWithBackend(session.accessToken);
+      }
+    });
+  }
+
+  Future<void> _syncWithBackend(String jwtToken) async {
+    try {
+      final authService = AuthService();
+      await authService.syncWithBackend(jwtToken);
+    } catch (e) {
+      print('Auth sync error: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Clover Lotto',
       theme: CloverTheme.themeData,
-      home: Supabase.instance.client.auth.currentUser == null
-          ? const LoginScreen()
-          : const HomeScreen(),
+      home: StreamBuilder<AuthState>(
+        stream: Supabase.instance.client.auth.onAuthStateChange,
+        builder: (context, snapshot) {
+          final session = Supabase.instance.client.auth.currentSession;
+          return session == null ? const LoginScreen() : const HomeScreen();
+        },
+      ),
     );
   }
 }
