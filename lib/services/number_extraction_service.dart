@@ -21,7 +21,7 @@ class NumberExtractionService {
         'Content-Type': 'application/json',
       },
       body: json.encode({
-        'strategy': _getStrategyFromMethod(method),
+        'strategy': method,  // Use method name directly
       }),
     );
 
@@ -31,20 +31,6 @@ class NumberExtractionService {
       return numbers;
     } else {
       throw Exception('Failed to extract numbers');
-    }
-  }
-
-  String _getStrategyFromMethod(String method) {
-    switch (method) {
-      case 'AI':
-        return 'FREQUENCY';  // Most frequent numbers
-      case '통계':
-        return 'FREQUENCY';
-      case '운세':
-        return 'RANDOM';
-      case '랜덤':
-      default:
-        return 'RANDOM';
     }
   }
 }

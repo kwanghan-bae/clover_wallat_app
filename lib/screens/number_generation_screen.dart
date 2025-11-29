@@ -33,11 +33,10 @@ class _NumberGenerationScreenState extends State<NumberGenerationScreen> with Si
   void _generateNumbers(String method) async {
     setState(() {
       _selectedMethod = method;
-      _generatedNumbers = [];  // Clear while loading
+      _generatedNumbers = [];
     });
 
     try {
-      // Try backend API first
       final service = NumberExtractionService();
       final numbers = await service.extractNumbers(method);
       setState(() {
@@ -45,7 +44,6 @@ class _NumberGenerationScreenState extends State<NumberGenerationScreen> with Si
         _animationController.forward(from: 0);
       });
     } catch (e) {
-      // Fallback to local generation
       final numbers = _generateByMethod(method);
       setState(() {
         _generatedNumbers = numbers;
@@ -58,34 +56,8 @@ class _NumberGenerationScreenState extends State<NumberGenerationScreen> with Si
     final random = Random();
     final Set<int> numbers = {};
     
-    switch (method) {
-      case 'AI':
-        // AI 추천: 최근 당첨 번호 분석 (모의)
-        while (numbers.length < 6) {
-          numbers.add(random.nextInt(45) + 1);
-        }
-        break;
-      case '통계':
-        // 통계 분석: 가장 많이 나온 번호 중심 (모의)
-        final frequently = [7, 11, 17, 23, 34, 43];
-        numbers.addAll(frequently);
-        break;
-      case '운세':
-        // 오늘의 운세: 생일 기반 (모의)
-        final today = DateTime.now();
-        final lucky = [(today.day % 45) + 1, (today.month * 3) % 45 + 1];
-        numbers.addAll(lucky);
-        while (numbers.length < 6) {
-          numbers.add(random.nextInt(45) + 1);
-        }
-        break;
-      case '랜덤':
-      default:
-        // 완전 랜덤
-        while (numbers.length < 6) {
-          numbers.add(random.nextInt(45) + 1);
-        }
-        break;
+    while (numbers.length < 6) {
+      numbers.add(random.nextInt(45) + 1);
     }
     
     return numbers.toList()..sort();
@@ -96,7 +68,7 @@ class _NumberGenerationScreenState extends State<NumberGenerationScreen> with Si
     return Scaffold(
       backgroundColor: CloverTheme.backgroundLight,
       appBar: AppBar(
-        title: const Text('번호 추첨'),
+        title: const Text('행운의 번호 추첨'),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
@@ -116,31 +88,32 @@ class _NumberGenerationScreenState extends State<NumberGenerationScreen> with Si
                 children: [
                   if (_selectedMethod.isNotEmpty) 
                     Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                       decoration: BoxDecoration(
                         color: Colors.white.withOpacity(0.2),
                         borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         _getMethodLabel(_selectedMethod),
-                        style: const TextStyle(color: Colors.white70, fontSize: 12),
+                        style: const TextStyle(color: Colors.white70, fontSize: 13, fontWeight: FontWeight.w600),
                       ),
                     ),
                   const SizedBox(height: 16),
                   _generatedNumbers.isEmpty
                       ? const Column(
                           children: [
-                            Icon(Icons.auto_awesome, color: Colors.white, size: 48),
-                            SizedBox(height: 8),
+                            Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 56),
+                            SizedBox(height: 12),
                             Text(
                               '아래에서 생성 방식을 선택하세요!',
-                              style: TextStyle(color: Colors.white70, fontSize: 14),
+                              style: TextStyle(color: Colors.white70, fontSize: 15),
+                              textAlign: TextAlign.center,
                             ),
                           ],
                         )
                       : Wrap(
-                          spacing: 8.0,
-                          runSpacing: 8.0,
+                          spacing: 10.0,
+                          runSpacing: 10.0,
                           alignment: WrapAlignment.center,
                           children: _generatedNumbers.map((n) {
                             return AnimatedBuilder(
@@ -152,16 +125,16 @@ class _NumberGenerationScreenState extends State<NumberGenerationScreen> with Si
                                 );
                               },
                               child: Container(
-                                width: 48,
-                                height: 48,
+                                width: 50,
+                                height: 50,
                                 decoration: BoxDecoration(
                                   color: _getNumberColor(n),
                                   shape: BoxShape.circle,
                                   boxShadow: [
                                     BoxShadow(
-                                      color: Colors.black.withOpacity(0.2),
-                                      blurRadius: 4,
-                                      offset: const Offset(0, 2),
+                                      color: Colors.black.withOpacity(0.25),
+                                      blurRadius: 8,
+                                      offset: const Offset(0, 3),
                                     ),
                                   ],
                                 ),
@@ -170,7 +143,7 @@ class _NumberGenerationScreenState extends State<NumberGenerationScreen> with Si
                                   n.toString(),
                                   style: const TextStyle(
                                     color: Colors.white,
-                                    fontSize: 20,
+                                    fontSize: 22,
                                     fontWeight: FontWeight.bold,
                                   ),
                                 ),
@@ -184,65 +157,119 @@ class _NumberGenerationScreenState extends State<NumberGenerationScreen> with Si
             const SizedBox(height: 32),
             
             // Generation Methods
-            const Text('생성 방식 선택', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            const Text('추첨 방식 선택', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 8),
+            const Text('다양한 방법으로 행운의 번호를 찾아보세요!', style: TextStyle(color: Colors.grey, fontSize: 13)),
             const SizedBox(height: 16),
-            GridView.count(
-              crossAxisCount: 2,
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              mainAxisSpacing: 16,
-              crossAxisSpacing: 16,
-              childAspectRatio: 1.2,
-              children: [
-                _buildMethodCard(
-                  icon: Icons.psychology_rounded,
-                  title: 'AI 추천',
-                  subtitle: '빅데이터 분석',
-                  color: Colors.purple,
-                  method: 'AI',
-                ),
-                _buildMethodCard(
-                  icon: Icons.bar_chart_rounded,
-                  title: '통계 분석',
-                  subtitle: '고빈도 번호',
-                  color: Colors.blue,
-                  method: '통계',
-                ),
-                _buildMethodCard(
-                  icon: Icons.stars_rounded,
-                  title: '오늘의 운세',
-                  subtitle: '생일 기반',
-                  color: Colors.amber,
-                  method: '운세',
-                ),
-                _buildMethodCard(
-                  icon: Icons.shuffle_rounded,
-                  title: '완전 랜덤',
-                  subtitle: '행운을 믿어요',
-                  color: Colors.green,
-                  method: '랜덤',
-                ),
-              ],
-            ),
             
-            const SizedBox(height: 32),
+            ...[ 
+              _buildMethodCard(
+                icon: Icons.bedtime_rounded,
+                title: '꿈 해몽',
+                subtitle: '밤에 꾼 꿈을 분석해요',
+                color: const Color(0xFF7E57C2),
+                method: 'DREAM',
+              ),
+              const SizedBox(height: 12),
+              _buildMethodCard(
+                icon: Icons.calendar_month_rounded,
+                title: '사주팔자',
+                subtitle: '생년월일로 행운의 숫자를',
+                color: const Color(0xFFD84315),
+                method: 'SAJU',
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildMethodCard(
+                      icon: Icons.trending_up_rounded,
+                      title: '통계 (HOT)',
+                      subtitle: '자주 나온 번호',
+                      color: const Color(0xFFEF5350),
+                      method: 'STATISTICS_HOT',
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildMethodCard(
+                      icon: Icons.trending_down_rounded,
+                      title: '통계 (COLD)',
+                      subtitle: '안 나온 번호',
+                      color: const Color(0xFF42A5F5),
+                      method: 'STATISTICS_COLD',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              _buildMethodCard(
+                icon: Icons.star_rounded,
+                title: '별자리 운세',
+                subtitle: '오늘의 별자리 행운',
+                color: const Color(0xFFFFA726),
+                method: 'HOROSCOPE',
+              ),
+              const SizedBox(height: 12),
+              _buildMethodCard(
+                icon: Icons.favorite_rounded,
+                title: '의미있는 숫자',
+                subtitle: '기념일, 생일 등 특별한 날',
+                color: const Color(0xFFEC407A),
+                method: 'PERSONAL_SIGNIFICANCE',
+              ),
+              const SizedBox(height: 12),
+              _buildMethodCard(
+                icon: Icons.eco_rounded,
+                title: '자연의 패턴',
+                subtitle: '피보나치, 계절의 리듬',
+                color: const Color(0xFF66BB6A),
+                method: 'NATURE_PATTERNS',
+              ),
+              const SizedBox(height: 12),
+              _buildMethodCard(
+                icon: Icons.auto_stories_rounded,
+                title: '고대 점술',
+                subtitle: '주역, 룬 등의 신비',
+                color: const Color(0xFF8D6E63),
+                method: 'ANCIENT_DIVINATION',
+              ),
+              const SizedBox(height: 12),
+              _buildMethodCard(
+                icon: Icons.palette_rounded,
+                title: '색상 & 소리',
+                subtitle: '색상 심리와 음악 주파수',
+                color: const Color(0xFF26C6DA),
+                method: 'COLORS_SOUNDS',
+              ),
+              const SizedBox(height: 12),
+              _buildMethodCard(
+                icon: Icons.pets_rounded,
+                title: '동물 징조',
+                subtitle: '동물의 신비로운 힘',
+                color: const Color(0xFFAB47BC),
+                method: 'ANIMAL_OMENS',
+              ),
+            ],
+            
+            const SizedBox(height: 24),
             
             // Tip
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: Colors.amber[50],
                 borderRadius: BorderRadius.circular(16),
-                boxShadow: CloverTheme.softShadow,
+                border: Border.all(color: Colors.amber[200]!),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.lightbulb_outline_rounded, color: Colors.amber[700], size: 24),
+                  Icon(Icons.lightbulb_outline_rounded, color: Colors.amber[800], size: 28),
                   const SizedBox(width: 12),
                   const Expanded(
                     child: Text(
-                      '각 방식마다 다른 알고리즘으로 번호를 생성해요!',
-                      style: TextStyle(color: Colors.grey, fontSize: 13),
+                      '각 방식마다 고유한 알고리즘으로 번호를 생성합니다. 마음에 드는 방법을 선택해보세요!',
+                      style: TextStyle(color: Colors.brown, fontSize: 13, height: 1.4),
                     ),
                   ),
                 ],
@@ -266,37 +293,48 @@ class _NumberGenerationScreenState extends State<NumberGenerationScreen> with Si
     return GestureDetector(
       onTap: () => _generateNumbers(method),
       child: Container(
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(20),
-          border: isSelected ? Border.all(color: color, width: 2) : null,
-          boxShadow: CloverTheme.softShadow,
+          borderRadius: BorderRadius.circular(16),
+          border: isSelected ? Border.all(color: color, width: 2.5) : null,
+          boxShadow: isSelected 
+            ? [BoxShadow(color: color.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 4))]
+            : CloverTheme.softShadow,
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Row(
           children: [
             Container(
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
-                shape: BoxShape.circle,
+                color: color.withOpacity(0.15),
+                borderRadius: BorderRadius.circular(12),
               ),
-              child: Icon(icon, color: color, size: 32),
+              child: Icon(icon, color: color, size: 28),
             ),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
-                color: isSelected ? color : Colors.black87,
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                      color: isSelected ? color : Colors.black87,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                  ),
+                ],
               ),
             ),
-            const SizedBox(height: 4),
-            Text(
-              subtitle,
-              style: const TextStyle(fontSize: 11, color: Colors.grey),
-            ),
+            if (isSelected)
+              Icon(Icons.check_circle_rounded, color: color, size: 24),
           ],
         ),
       ),
@@ -304,20 +342,26 @@ class _NumberGenerationScreenState extends State<NumberGenerationScreen> with Si
   }
 
   String _getMethodLabel(String method) {
-    switch (method) {
-      case 'AI': return '🤖 AI 추천';
-      case '통계': return '📊 통계 분석';
-      case '운세': return '✨ 오늘의 운세';
-      case '랜덤': return '🎲 랜덤';
-      default: return '';
-    }
+    final labels = {
+      'DREAM': '🌙 꿈 해몽',
+      'SAJU': '📅 사주팔자',
+      'STATISTICS_HOT': '🔥 통계 HOT',
+      'STATISTICS_COLD': '❄️ 통계 COLD',
+      'HOROSCOPE': '⭐ 별자리 운세',
+      'PERSONAL_SIGNIFICANCE': '💝 의미있는 숫자',
+      'NATURE_PATTERNS': '🌿 자연의 패턴',
+      'ANCIENT_DIVINATION': '📜 고대 점술',
+      'COLORS_SOUNDS': '🎨 색상 & 소리',
+      'ANIMAL_OMENS': '🐾 동물 징조',
+    };
+    return labels[method] ?? '';
   }
 
   Color _getNumberColor(int number) {
-    if (number <= 10) return const Color(0xFFFFA726); // Orange
-    if (number <= 20) return const Color(0xFF42A5F5); // Blue
-    if (number <= 30) return const Color(0xFFEF5350); // Red
-    if (number <= 40) return const Color(0xFF9E9E9E); // Grey
-    return const Color(0xFF66BB6A); // Green
+    if (number <= 10) return const Color(0xFFFFA726);
+    if (number <= 20) return const Color(0xFF42A5F5);
+    if (number <= 30) return const Color(0xFFEF5350);
+    if (number <= 40) return const Color(0xFF9E9E9E);
+    return const Color(0xFF66BB6A);
   }
 }
