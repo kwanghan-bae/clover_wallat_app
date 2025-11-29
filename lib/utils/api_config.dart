@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 class ApiConfig {
   static String get baseUrl {
     if (kReleaseMode) {
-      return 'https://api.cloverwallet.com'; // Replace with real prod URL
+      return 'https://clover-wallet-api.onrender.com';
     }
     
     // Android Emulator requires 10.0.2.2 to access host localhost
