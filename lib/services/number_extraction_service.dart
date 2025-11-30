@@ -38,11 +38,16 @@ class NumberExtractionService {
     );
 
     if (response.statusCode == 200) {
-      final data = json.decode(response.body) as Map<String, dynamic>;
-      final numbers = (data['numbers'] as List).cast<int>();
-      return numbers;
+      final responseData = json.decode(response.body) as Map<String, dynamic>;
+      // CommonResponse 형식: {success: true, data: [1,2,3...]}
+      if (responseData['success'] == true && responseData['data'] != null) {
+        final numbers = (responseData['data'] as List).cast<int>();
+        return numbers..sort(); // 정렬해서 반환
+      } else {
+        throw Exception('Invalid response format');
+      }
     } else {
-      throw Exception('Failed to extract numbers');
+      throw Exception('Failed to extract numbers: ${response.statusCode}');
     }
   }
 }
