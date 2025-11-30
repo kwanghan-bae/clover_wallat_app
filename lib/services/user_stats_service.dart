@@ -14,22 +14,26 @@ class UserStatsService {
     // For now, using a placeholder userId
     final userId = 1;
 
-    final url = Uri.parse('${ApiConfig.baseUrl}/api/v1/users/$userId/stats');
-    final session = Supabase.instance.client.auth.currentSession;
-    final token = session?.accessToken;
+    try {
+      final url = Uri.parse('${ApiConfig.baseUrl}/api/v1/users/$userId/stats');
+      final session = Supabase.instance.client.auth.currentSession;
+      final token = session?.accessToken;
 
-    final response = await http.get(
-      url,
-      headers: {
-        'Authorization': 'Bearer $token',
-        'Content-Type': 'application/json',
-      },
-    );
+      final response = await http.get(
+        url,
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Content-Type': 'application/json',
+        },
+      );
 
-    if (response.statusCode == 200) {
-      return json.decode(response.body) as Map<String, dynamic>;
-    } else {
-      throw Exception('Failed to load stats');
+      if (response.statusCode == 200) {
+        return json.decode(response.body) as Map<String, dynamic>;
+      }
+      return {'totalWinnings': 0, 'roi': 0};
+    } catch (e) {
+      // 에러 발생 시 기본값 반환 (0원, 0%)
+      return {'totalWinnings': 0, 'roi': 0};
     }
   }
 }

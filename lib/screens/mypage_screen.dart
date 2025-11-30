@@ -239,9 +239,34 @@ class MyPageScreen extends StatelessWidget {
           const Divider(height: 1),
           _buildMenuItem(Icons.info_outline_rounded, '앱 정보'),
           const Divider(height: 1),
-          _buildMenuItem(Icons.logout_rounded, '로그아웃', isDestructive: true, onTap: () async {
+          _buildMenuItem(Icons.logout_rounded, '로그아웃', onTap: () async {
             await Supabase.instance.client.auth.signOut();
-            // Navigation handled by auth state listener in main.dart
+          }),
+          const Divider(height: 1),
+          _buildMenuItem(Icons.person_off_rounded, '회원 탈퇴', isDestructive: true, onTap: () {
+            showDialog(
+              context: context,
+              builder: (context) => AlertDialog(
+                title: const Text('회원 탈퇴'),
+                content: const Text('정말로 탈퇴하시겠습니까?\n모든 데이터가 즉시 삭제되며 복구할 수 없습니다.'),
+                actions: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context),
+                    child: const Text('취소'),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      // TODO: Call delete account API
+                      await Supabase.instance.client.auth.signOut();
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: const Text('탈퇴', style: TextStyle(color: Colors.red)),
+                  ),
+                ],
+              ),
+            );
           }),
         ],
       ),
