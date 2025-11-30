@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:clover_wallet_app/utils/theme.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:clover_wallet_app/screens/notification_settings_screen.dart';
+import 'package:clover_wallet_app/screens/privacy_policy_screen.dart';
 import 'package:clover_wallet_app/services/user_stats_service.dart';
 
 class MyPageScreen extends StatelessWidget {
@@ -222,14 +223,19 @@ class MyPageScreen extends StatelessWidget {
       ),
       child: Column(
         children: [
-          _buildMenuItem(Icons.notifications_none_rounded, '알림 설정', onTap: () {
+          _buildMenuItem(Icons.notifications_outlined, '알림 설정', onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const NotificationSettingsScreen()),
             );
           }),
           const Divider(height: 1),
-          _buildMenuItem(Icons.lock_outline_rounded, '개인정보 처리방침'),
+          _buildMenuItem(Icons.privacy_tip_outlined, '개인정보 처리방침', onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const PrivacyPolicyScreen()),
+            );
+          }),
           const Divider(height: 1),
           _buildMenuItem(Icons.info_outline_rounded, '앱 정보'),
           const Divider(height: 1),
