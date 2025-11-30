@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:clover_wallet_app/screens/number_generation_screen.dart';
 import 'package:clover_wallet_app/screens/history_screen.dart';
 import 'package:clover_wallet_app/screens/hotspot_screen.dart';
 import 'package:clover_wallet_app/screens/qr_scan_screen.dart';
+import 'package:clover_wallet_app/utils/theme.dart';
+import 'package:clover_wallet_app/services/winning_news_service.dart';
+import 'package:clover_wallet_app/services/lotto_info_service.dart';
 import 'package:clover_wallet_app/screens/statistics_screen.dart';
 import 'package:clover_wallet_app/screens/community_screen.dart';
 import 'package:clover_wallet_app/screens/mypage_screen.dart';
@@ -95,7 +99,7 @@ class DashboardTab extends StatelessWidget {
           children: [
             Icon(Icons.filter_vintage, color: CloverTheme.primaryColor),
             const SizedBox(width: 8),
-            const Text('Clover Lotto', style: TextStyle(fontWeight: FontWeight.w800)),
+            const Text('Clover Wallet', style: TextStyle(fontWeight: FontWeight.w800)),
           ],
         ),
         actions: [
@@ -131,60 +135,71 @@ class DashboardTab extends StatelessWidget {
   }
 
   Widget _buildNextDrawCard(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: CloverTheme.primaryGradient,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: CloverTheme.softShadow,
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: const Text(
-              '제 1100 회',
-              style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-            ),
+    return FutureBuilder<Map<String, dynamic>>(
+      future: LottoInfoService().getNextDrawInfo(),
+      builder: (context, snapshot) {
+        final data = snapshot.data ?? {
+          'currentRound': 1100,
+          'daysLeft': 0,
+          'hoursLeft': 0,
+          'minutesLeft': 0,
+        };
+
+        return Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            gradient: CloverTheme.primaryGradient,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: CloverTheme.softShadow,
           ),
-          const SizedBox(height: 16),
-          const Text(
-            '당첨 발표까지',
-            style: TextStyle(color: Colors.white70, fontSize: 14),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.white.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  '제 ${data['currentRound']} 회',
+                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                '당첨 발표까지',
+                style: TextStyle(color: Colors.white70, fontSize: 14),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                '${data['daysLeft']}일 ${data['hoursLeft']}시간 ${data['minutesLeft']}분',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 32,
+                  fontWeight: FontWeight.w900,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const NumberGenerationScreen()),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.white,
+                  foregroundColor: CloverTheme.primaryColor,
+                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                ),
+                child: const Text('번호 생성하기', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              ),
+            ],
           ),
-          const SizedBox(height: 4),
-          const Text(
-            '3일 12시간 30분',
-            style: TextStyle(
-              color: Colors.white,
-              fontSize: 32,
-              fontWeight: FontWeight.w900,
-              letterSpacing: -0.5,
-            ),
-          ),
-          const SizedBox(height: 20),
-          ElevatedButton(
-            onPressed: () {
-               Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => const NumberGenerationScreen()),
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: CloverTheme.primaryColor,
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-              elevation: 0,
-            ),
-            child: const Text('번호 추첨하기'),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 

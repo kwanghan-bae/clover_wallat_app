@@ -97,7 +97,7 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Clover Lotto',
+      title: 'Clover Wallet',
       theme: CloverTheme.themeData,
       home: StreamBuilder<AuthState>(
         stream: Supabase.instance.client.auth.onAuthStateChange,
