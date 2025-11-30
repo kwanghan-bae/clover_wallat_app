@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:clover_wallet_app/utils/theme.dart';
 import 'package:clover_wallet_app/services/number_extraction_service.dart';
+import 'package:clover_wallet_app/widgets/extraction_parameter_dialog.dart';
 import 'dart:math';
 
 class NumberGenerationScreen extends StatefulWidget {
@@ -31,6 +32,13 @@ class _NumberGenerationScreenState extends State<NumberGenerationScreen> with Si
   }
 
   void _generateNumbers(String method) async {
+    // 사용자 입력 필요한 경우 파라미터 다이얼로그 표시
+    Map<String, dynamic>? parameters;
+    if (['DREAM', 'SAJU', 'HOROSCOPE', 'PERSONAL_SIGNIFICANCE', 'COLORS_SOUNDS', 'ANIMAL_OMENS'].contains(method)) {
+      parameters = await ExtractionParameterDialog.show(context, method);
+      if (parameters == null) return; // 취소한 경우
+    }
+
     setState(() {
       _selectedMethod = method;
       _generatedNumbers = [];
@@ -38,7 +46,7 @@ class _NumberGenerationScreenState extends State<NumberGenerationScreen> with Si
 
     try {
       final service = NumberExtractionService();
-      final numbers = await service.extractNumbers(method);
+      final numbers = await service.extractNumbers(method, parameters: parameters);
       setState(() {
         _generatedNumbers = numbers;
         _animationController.forward(from: 0);
