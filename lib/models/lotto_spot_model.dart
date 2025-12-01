@@ -28,4 +28,5 @@ class LottoSpot {
       secondPrizeCount: json['secondPrizeCount'] ?? 0,
     );
   }
+
 }

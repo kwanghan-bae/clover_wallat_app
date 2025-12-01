@@ -1,6 +1,7 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:clover_wallet_app/utils/api_config.dart';
+import 'package:clover_wallet_app/services/auth_service.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 class UserStatsService {
@@ -10,9 +11,11 @@ class UserStatsService {
       throw Exception('User not logged in');
     }
 
-    // Get user ID from preferences or API
-    // For now, using a placeholder userId
-    final userId = 1;
+    // Get user ID from AuthService
+    final userId = await AuthService().getUserId();
+    if (userId == null) {
+      return {'totalWinnings': 0, 'roi': 0};
+    }
 
     try {
       final url = Uri.parse('${ApiConfig.baseUrl}/api/v1/users/$userId/stats');

@@ -4,6 +4,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:clover_wallet_app/screens/notification_settings_screen.dart';
 import 'package:clover_wallet_app/screens/privacy_policy_screen.dart';
 import 'package:clover_wallet_app/services/user_stats_service.dart';
+import 'package:clover_wallet_app/services/user_service.dart';
+import 'package:clover_wallet_app/services/auth_service.dart';
 
 class MyPageScreen extends StatelessWidget {
   const MyPageScreen({super.key});
@@ -256,10 +258,19 @@ class MyPageScreen extends StatelessWidget {
                   ),
                   TextButton(
                     onPressed: () async {
-                      // TODO: Call delete account API
-                      await Supabase.instance.client.auth.signOut();
-                      if (context.mounted) {
-                        Navigator.pop(context);
+                      try {
+                        await UserService().deleteAccount();
+                        await Supabase.instance.client.auth.signOut();
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('회원 탈퇴 실패: $e')),
+                          );
+                          Navigator.pop(context);
+                        }
                       }
                     },
                     child: const Text('탈퇴', style: TextStyle(color: Colors.red)),

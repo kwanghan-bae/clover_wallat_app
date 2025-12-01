@@ -33,7 +33,7 @@ class _CreatePostScreenState extends State<CreatePostScreen> {
     setState(() => _isPosting = true);
 
     // 제목 없이 내용만 전송
-    context.read<CommunityViewModel>().addPost('', content);
+    context.read<CommunityViewModel>().addPost(content);
     
     setState(() => _isPosting = false);
     Navigator.pop(context);

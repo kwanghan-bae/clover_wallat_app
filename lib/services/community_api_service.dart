@@ -28,14 +28,13 @@ class CommunityApiService {
     }
   }
 
-  Future<PostModel> createPost(String title, String content) async {
+  Future<PostModel> createPost(String content) async {
     final url = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.communityPrefix}/posts');
     // TODO: Add Authorization header with JWT
     final response = await http.post(
       url,
       headers: {'Content-Type': 'application/json'},
       body: jsonEncode({
-        'title': title,
         'content': content,
         // 'userId': ... // handled by backend via JWT
       }),

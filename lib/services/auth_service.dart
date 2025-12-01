@@ -2,6 +2,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:clover_wallet_app/utils/api_config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
 class AuthService {
   final SupabaseClient _supabase = Supabase.instance.client;
@@ -41,14 +43,28 @@ class AuthService {
         },
       );
 
-      if (response.statusCode != 200) {
-        print('Backend sync failed: ${response.statusCode}');
+      if (response.statusCode == 200) {
+        final data = jsonDecode(utf8.decode(response.bodyBytes));
+        final userId = data['userId'];
+        if (userId != null) {
+          // Store userId securely or in shared preferences
+          // For simplicity in this demo, we'll use a static variable or provider
+          // But ideally use SharedPreferences
+           final prefs = await SharedPreferences.getInstance();
+           await prefs.setInt('userId', userId);
+           print('Backend sync success. UserId: $userId');
+        }
       } else {
-        print('Backend sync success');
+        print('Backend sync failed: ${response.statusCode}');
       }
     } catch (e) {
       print('Backend sync error: $e');
     }
+  }
+
+  Future<int?> getUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt('userId');
   }
 
   Future<void> signOut() async {

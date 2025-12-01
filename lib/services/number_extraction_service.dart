@@ -16,7 +16,7 @@ class NumberExtractionService {
 
     // 요청 바디 구성
     final requestBody = <String, dynamic>{
-      'strategy': method,
+      'method': method,
     };
 
     // 파라미터 추가

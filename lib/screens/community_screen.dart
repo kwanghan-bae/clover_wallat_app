@@ -70,7 +70,7 @@ class CommunityScreen extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text(
-                                  post.author ?? '익명 사용자',
+                                  post.authorName,
                                   style: const TextStyle(fontWeight: FontWeight.bold),
                                 ),
                                 Text(
@@ -91,11 +91,7 @@ class CommunityScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            post.title,
-                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                          ),
-                          const SizedBox(height: 8),
+
                           Text(
                             post.content,
                             style: TextStyle(color: Colors.grey[800], height: 1.5),
@@ -116,9 +112,9 @@ class CommunityScreen extends StatelessWidget {
                       ),
                       child: Row(
                         children: [
-                          _buildInteractionButton(Icons.favorite_border_rounded, '${post.likes}'),
+                          _buildInteractionButton(Icons.favorite_border_rounded, '${post.likeCount}'),
                           const SizedBox(width: 16),
-                          _buildInteractionButton(Icons.chat_bubble_outline_rounded, '${post.comments}'),
+                          _buildInteractionButton(Icons.visibility_outlined, '${post.viewCount}'),
                           const Spacer(),
                           const Icon(Icons.share_rounded, color: Colors.grey, size: 20),
                         ],
