@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:clover_wallet_app/models/history_model.dart';
 import 'package:clover_wallet_app/viewmodels/history_viewmodel.dart';
 import 'package:intl/intl.dart';
+import 'package:clover_wallet_app/screens/scan_screen.dart';
 
 class HistoryScreen extends StatelessWidget {
   const HistoryScreen({super.key});
@@ -12,6 +13,40 @@ class HistoryScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('내 로또 내역'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.qr_code_scanner),
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const ScanScreen()),
+              );
+              
+              if (result != null && result is Map) {
+                final numbers = result['numbers'] as List<int>?;
+                final round = result['round'] as int?;
+                
+                if (numbers != null && numbers.length == 6) {
+                  // Add scanned ticket to history
+                  Provider.of<HistoryViewModel>(context, listen: false).addEntry(
+                    HistoryModel(
+                      round: round ?? 0,
+                      numbers: numbers,
+                      date: DateTime.now(),
+                    ),
+                  );
+                  
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('스캔한 티켓이 추가되었습니다.')),
+                    );
+                  }
+                }
+              }
+            },
+            tooltip: '티켓 스캔',
+          ),
+        ],
       ),
       body: Consumer<HistoryViewModel>(
         builder: (context, viewModel, child) {
