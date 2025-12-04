@@ -29,6 +29,7 @@ class PostModel {
   final DateTime createdAt;
   final int likeCount;
   final int viewCount;
+  final bool isLiked;
 
   PostModel({
     required this.id,
@@ -37,6 +38,7 @@ class PostModel {
     required this.createdAt,
     this.likeCount = 0,
     this.viewCount = 0,
+    this.isLiked = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -47,6 +49,7 @@ class PostModel {
       'createdAt': createdAt.toIso8601String(),
       'likeCount': likeCount,
       'viewCount': viewCount,
+      'isLiked': isLiked,
     };
   }
 
@@ -58,6 +61,7 @@ class PostModel {
       createdAt: map['createdAt'] != null ? DateTime.parse(map['createdAt']) : DateTime.now(),
       likeCount: map['likeCount'] ?? 0,
       viewCount: map['viewCount'] ?? 0,
+      isLiked: map['isLiked'] ?? false,
     );
   }
 

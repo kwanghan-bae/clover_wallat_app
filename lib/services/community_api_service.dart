@@ -1,27 +1,31 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:clover_wallet_app/models/post_model.dart';
 import 'package:clover_wallet_app/models/common_response.dart';
 import 'package:clover_wallet_app/utils/api_config.dart';
 
 class CommunityApiService {
-  Future<List<PostModel>> getPosts() async {
-    final url = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.communityPrefix}/posts');
-    final response = await http.get(url);
+  Future<List<PostModel>> getPosts({int page = 0, int size = 10}) async {
+    final url = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.communityPrefix}/posts?page=$page&size=$size');
+    
+    final token = Supabase.instance.client.auth.currentSession?.accessToken;
+    final headers = token != null ? {'Authorization': 'Bearer $token'} : <String, String>{};
+
+    final response = await http.get(url, headers: headers);
 
     if (response.statusCode == 200) {
       final decodedBody = jsonDecode(utf8.decode(response.bodyBytes));
-      final commonResponse = CommonResponse<List<dynamic>>.fromJson(
-        decodedBody,
-        (json) => json as List<dynamic>,
-      );
-
-      if (commonResponse.isSuccess && commonResponse.data != null) {
-        return commonResponse.data!
-            .map((item) => PostModel.fromMap(item))
-            .toList();
+      // Backend returns CommonResponse<Page<PostResponse>>
+      // Structure: { success: true, data: { content: [...], pageable: ... }, message: ... }
+      
+      final commonResponse = decodedBody;
+      if (commonResponse['success'] == true && commonResponse['data'] != null) {
+        final data = commonResponse['data'];
+        final content = data['content'] as List;
+        return content.map((item) => PostModel.fromMap(item)).toList();
       } else {
-        throw Exception(commonResponse.message ?? 'Failed to load posts');
+        throw Exception(commonResponse['message'] ?? 'Failed to load posts');
       }
     } else {
       throw Exception('Failed to load posts: ${response.statusCode}');
@@ -30,10 +34,16 @@ class CommunityApiService {
 
   Future<PostModel> createPost(String content) async {
     final url = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.communityPrefix}/posts');
-    // TODO: Add Authorization header with JWT
+    
+    final token = Supabase.instance.client.auth.currentSession?.accessToken;
+    if (token == null) throw Exception('No auth token found');
+
     final response = await http.post(
       url,
-      headers: {'Content-Type': 'application/json'},
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
       body: jsonEncode({
         'content': content,
         // 'userId': ... // handled by backend via JWT
@@ -54,6 +64,38 @@ class CommunityApiService {
       }
     } else {
       throw Exception('Failed to create post: ${response.statusCode}');
+    }
+  }
+
+
+  Future<PostModel> likePost(int postId) async {
+    final url = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.communityPrefix}/posts/$postId/like');
+    
+    final token = Supabase.instance.client.auth.currentSession?.accessToken;
+    if (token == null) throw Exception('No auth token found');
+
+    final response = await http.post(
+      url,
+      headers: {
+        'Authorization': 'Bearer $token',
+        'Content-Type': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      final decodedBody = jsonDecode(utf8.decode(response.bodyBytes));
+      final commonResponse = CommonResponse<Map<String, dynamic>>.fromJson(
+        decodedBody,
+        (json) => json as Map<String, dynamic>,
+      );
+
+      if (commonResponse.isSuccess && commonResponse.data != null) {
+        return PostModel.fromMap(commonResponse.data!);
+      } else {
+        throw Exception(commonResponse.message ?? 'Failed to like post');
+      }
+    } else {
+      throw Exception('Failed to like post: ${response.statusCode}');
     }
   }
 }

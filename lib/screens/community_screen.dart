@@ -4,9 +4,35 @@ import 'package:clover_wallet_app/viewmodels/community_viewmodel.dart';
 import 'package:clover_wallet_app/screens/create_post_screen.dart';
 import 'package:clover_wallet_app/utils/theme.dart';
 import 'package:intl/intl.dart';
+import 'package:share_plus/share_plus.dart';
 
-class CommunityScreen extends StatelessWidget {
+class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
+
+  @override
+  State<CommunityScreen> createState() => _CommunityScreenState();
+}
+
+class _CommunityScreenState extends State<CommunityScreen> {
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent - 200) {
+      context.read<CommunityViewModel>().loadMorePosts();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,13 +43,17 @@ class CommunityScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.search_rounded),
-            onPressed: () {},
+            onPressed: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('검색 기능은 준비 중입니다.')),
+              );
+            },
           ),
         ],
       ),
       body: Consumer<CommunityViewModel>(
         builder: (context, viewModel, child) {
-          if (viewModel.isLoading) {
+          if (viewModel.isLoading && viewModel.posts.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
 
@@ -40,90 +70,115 @@ class CommunityScreen extends StatelessWidget {
             );
           }
 
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: viewModel.posts.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 16),
-            itemBuilder: (context, index) {
-              final post = viewModel.posts[index];
-              return Container(
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: CloverTheme.softShadow,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Header
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            backgroundColor: CloverTheme.primaryColor.withOpacity(0.1),
-                            child: const Icon(Icons.person, color: CloverTheme.primaryColor),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  post.authorName,
-                                  style: const TextStyle(fontWeight: FontWeight.bold),
-                                ),
-                                Text(
-                                  DateFormat('MM/dd HH:mm').format(post.createdAt),
-                                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
-                                ),
-                              ],
-                            ),
-                          ),
-                          const Icon(Icons.more_horiz_rounded, color: Colors.grey),
-                        ],
-                      ),
-                    ),
-                    
-                    // Content
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+          return RefreshIndicator(
+            onRefresh: viewModel.refresh,
+            child: ListView.separated(
+              controller: _scrollController,
+              padding: const EdgeInsets.all(16),
+              itemCount: viewModel.posts.length + (viewModel.isLoadingMore ? 1 : 0),
+              separatorBuilder: (context, index) => const SizedBox(height: 16),
+              itemBuilder: (context, index) {
+                if (index == viewModel.posts.length) {
+                  return const Center(child: Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: CircularProgressIndicator(),
+                  ));
+                }
 
-                          Text(
-                            post.content,
-                            style: TextStyle(color: Colors.grey[800], height: 1.5),
-                            maxLines: 3,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                        ],
+                final post = viewModel.posts[index];
+                return Container(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: CloverTheme.softShadow,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header
+                      Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            CircleAvatar(
+                              backgroundColor: CloverTheme.primaryColor.withOpacity(0.1),
+                              child: const Icon(Icons.person, color: CloverTheme.primaryColor),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    post.authorName,
+                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                  Text(
+                                    DateFormat('MM/dd HH:mm').format(post.createdAt),
+                                    style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            const Icon(Icons.more_horiz_rounded, color: Colors.grey),
+                          ],
+                        ),
                       ),
-                    ),
-                    
-                    const SizedBox(height: 16),
-                    
-                    // Footer (Likes & Comments)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      decoration: BoxDecoration(
-                        border: Border(top: BorderSide(color: Colors.grey[100]!)),
+                      
+                      // Content
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              post.content,
+                              style: TextStyle(color: Colors.grey[800], height: 1.5),
+                              maxLines: 3,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
                       ),
-                      child: Row(
-                        children: [
-                          _buildInteractionButton(Icons.favorite_border_rounded, '${post.likeCount}'),
-                          const SizedBox(width: 16),
-                          _buildInteractionButton(Icons.visibility_outlined, '${post.viewCount}'),
-                          const Spacer(),
-                          const Icon(Icons.share_rounded, color: Colors.grey, size: 20),
-                        ],
+                      
+                      const SizedBox(height: 16),
+                      
+                      // Footer (Likes & Comments)
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          border: Border(top: BorderSide(color: Colors.grey[100]!)),
+                        ),
+                        child: Row(
+                          children: [
+                            _buildInteractionButton(
+                              icon: post.isLiked ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                              count: '${post.likeCount}',
+                              color: post.isLiked ? Colors.red : null,
+                              onTap: () {
+                                context.read<CommunityViewModel>().toggleLike(post.id);
+                              },
+                            ),
+                            const SizedBox(width: 16),
+                            _buildInteractionButton(
+                              icon: Icons.visibility_outlined,
+                              count: '${post.viewCount}',
+                            ),
+                            const Spacer(),
+                            GestureDetector(
+                              onTap: () {
+                                Share.share('${post.authorName}님의 게시물: ${post.content}');
+                              },
+                              child: const Icon(Icons.share_rounded, color: Colors.grey, size: 20),
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              );
-            },
+                    ],
+                  ),
+                );
+              },
+            ),
           );
         },
       ),
@@ -142,13 +197,21 @@ class CommunityScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInteractionButton(IconData icon, String count) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: Colors.grey[600]),
-        const SizedBox(width: 4),
-        Text(count, style: TextStyle(color: Colors.grey[600], fontSize: 13)),
-      ],
+  Widget _buildInteractionButton({
+    required IconData icon,
+    required String count,
+    Color? color,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Row(
+        children: [
+          Icon(icon, size: 20, color: color ?? Colors.grey[600]),
+          const SizedBox(width: 4),
+          Text(count, style: TextStyle(color: color ?? Colors.grey[600], fontSize: 13)),
+        ],
+      ),
     );
   }
 }
