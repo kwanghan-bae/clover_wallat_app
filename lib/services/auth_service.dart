@@ -47,18 +47,22 @@ class AuthService {
         final data = jsonDecode(utf8.decode(response.bodyBytes));
         final userId = data['userId'];
         if (userId != null) {
-          // Store userId securely or in shared preferences
-          // For simplicity in this demo, we'll use a static variable or provider
-          // But ideally use SharedPreferences
            final prefs = await SharedPreferences.getInstance();
            await prefs.setInt('userId', userId);
-           print('Backend sync success. UserId: $userId');
+           if (kDebugMode) {
+             print('Backend sync success. UserId: $userId');
+           }
+        } else {
+          throw Exception('User ID not found in response');
         }
       } else {
-        print('Backend sync failed: ${response.statusCode}');
+        throw Exception('Backend sync failed: ${response.statusCode}');
       }
     } catch (e) {
-      print('Backend sync error: $e');
+      if (kDebugMode) {
+        print('Backend sync error: $e');
+      }
+      rethrow; // Allow caller to handle
     }
   }
 

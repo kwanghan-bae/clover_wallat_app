@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:clover_wallet_app/utils/theme.dart';
 import 'package:clover_wallet_app/services/number_extraction_service.dart';
 import 'package:clover_wallet_app/widgets/extraction_parameter_dialog.dart';
+import 'package:provider/provider.dart';
+import 'package:clover_wallet_app/services/lotto_api_service.dart';
 import 'dart:math';
 
 class NumberGenerationScreen extends StatefulWidget {
@@ -69,6 +71,31 @@ class _NumberGenerationScreenState extends State<NumberGenerationScreen> with Si
     }
     
     return numbers.toList()..sort();
+  }
+
+  Future<void> _saveNumbers() async {
+    if (_generatedNumbers.isEmpty) return;
+
+    try {
+      await context.read<LottoApiService>().saveGame(_generatedNumbers);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('번호가 저장되었습니다! 내 로또 탭에서 확인하세요.'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('저장 실패: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
+    }
   }
 
   @override
@@ -159,6 +186,20 @@ class _NumberGenerationScreenState extends State<NumberGenerationScreen> with Si
                             );
                           }).toList(),
                         ),
+                  if (_generatedNumbers.isNotEmpty) ...[
+                    const SizedBox(height: 24),
+                    ElevatedButton.icon(
+                      onPressed: _saveNumbers,
+                      icon: const Icon(Icons.save_alt_rounded),
+                      label: const Text('번호 저장하기'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        foregroundColor: CloverTheme.primaryColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),

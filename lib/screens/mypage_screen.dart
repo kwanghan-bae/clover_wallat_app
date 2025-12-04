@@ -5,7 +5,7 @@ import 'package:clover_wallet_app/screens/notification_settings_screen.dart';
 import 'package:clover_wallet_app/screens/privacy_policy_screen.dart';
 import 'package:clover_wallet_app/services/user_stats_service.dart';
 import 'package:clover_wallet_app/services/user_service.dart';
-import 'package:clover_wallet_app/services/auth_service.dart';
+
 
 class MyPageScreen extends StatelessWidget {
   const MyPageScreen({super.key});

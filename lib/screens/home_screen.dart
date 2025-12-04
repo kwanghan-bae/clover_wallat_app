@@ -4,13 +4,11 @@ import 'package:clover_wallet_app/screens/history_screen.dart';
 import 'package:clover_wallet_app/screens/hotspot_screen.dart';
 import 'package:clover_wallet_app/screens/qr_scan_screen.dart';
 import 'package:clover_wallet_app/utils/theme.dart';
-import 'package:clover_wallet_app/services/winning_news_service.dart';
 import 'package:clover_wallet_app/services/lotto_info_service.dart';
 import 'package:clover_wallet_app/screens/statistics_screen.dart';
 import 'package:clover_wallet_app/screens/community_screen.dart';
 import 'package:clover_wallet_app/screens/mypage_screen.dart';
-import 'package:clover_wallet_app/screens/number_generation_screen.dart';
-import 'package:clover_wallet_app/utils/theme.dart';
+import 'package:clover_wallet_app/screens/notification_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,13 +20,19 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
 
-  final List<Widget> _screens = [
-    const DashboardTab(),
-    const HistoryScreen(),
-    const HotspotScreen(),
-    const CommunityScreen(),
-    const MyPageScreen(),
-  ];
+  final List<Widget> _screens = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _screens.addAll([
+      DashboardTab(onTabChange: _onItemTapped),
+      const HistoryScreen(),
+      const HotspotScreen(),
+      const CommunityScreen(),
+      const MyPageScreen(),
+    ]);
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -88,7 +92,9 @@ class _HomeScreenState extends State<HomeScreen> {
 }
 
 class DashboardTab extends StatelessWidget {
-  const DashboardTab({super.key});
+  final Function(int) onTabChange;
+
+  const DashboardTab({super.key, required this.onTabChange});
 
   @override
   Widget build(BuildContext context) {
@@ -105,7 +111,12 @@ class DashboardTab extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none_rounded),
-            onPressed: () {},
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => const NotificationScreen()),
+              );
+            },
           ),
         ],
       ),
@@ -217,7 +228,7 @@ class DashboardTab extends StatelessWidget {
           Navigator.push(context, MaterialPageRoute(builder: (context) => const StatisticsScreen()));
         }),
         _buildQuickActionItem(context, Icons.map_rounded, '명당 찾기', Colors.red, () {
-          // Tab switch logic needed or navigation
+          onTabChange(2); // Switch to Hotspot tab
         }),
       ],
     );
