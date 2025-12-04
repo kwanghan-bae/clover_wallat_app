@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:clover_wallet_app/utils/theme.dart';
 import 'package:clover_wallet_app/screens/home_screen.dart';
 import 'package:clover_wallet_app/services/community_api_service.dart';
+import 'package:clover_wallet_app/services/lotto_api_service.dart';
 import 'package:clover_wallet_app/viewmodels/community_viewmodel.dart';
 import 'package:clover_wallet_app/services/lotto_spot_api_service.dart';
 import 'package:clover_wallet_app/viewmodels/lotto_spot_viewmodel.dart';
@@ -14,6 +15,9 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:clover_wallet_app/screens/login_screen.dart';
 
 import 'package:clover_wallet_app/services/auth_service.dart';
+import 'package:clover_wallet_app/services/fcm_service.dart';
+
+final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,11 +27,18 @@ void main() async {
     anonKey: 'sb_publishable_xeGYwBzLsfMVstSqv35SHA_5Qw2kOEx',
   );
 
+  // Initialize FCM
+  final fcmService = FcmService();
+  await fcmService.initialize();
+
   runApp(
     MultiProvider(
       providers: [
         Provider<CommunityApiService>(
           create: (_) => CommunityApiService(),
+        ),
+        Provider<LottoApiService>(
+          create: (_) => LottoApiService(),
         ),
         ChangeNotifierProvider<CommunityViewModel>(
           create: (context) => CommunityViewModel(
@@ -91,6 +102,18 @@ class _MyAppState extends State<MyApp> {
       await authService.syncWithBackend(jwtToken);
     } catch (e) {
       print('Auth sync error: $e');
+      scaffoldMessengerKey.currentState?.showSnackBar(
+        SnackBar(
+          content: Text('서버 동기화 실패: $e'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 5),
+          action: SnackBarAction(
+            label: '재시도',
+            textColor: Colors.white,
+            onPressed: () => _syncWithBackend(jwtToken),
+          ),
+        ),
+      );
     }
   }
 
@@ -98,6 +121,7 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Clover Wallet',
+      scaffoldMessengerKey: scaffoldMessengerKey,
       theme: CloverTheme.themeData,
       home: StreamBuilder<AuthState>(
         stream: Supabase.instance.client.auth.onAuthStateChange,

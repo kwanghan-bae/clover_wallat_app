@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:clover_wallet_app/viewmodels/lotto_spot_viewmodel.dart';
 import 'package:clover_wallet_app/utils/theme.dart';
+import 'package:geolocator/geolocator.dart';
 
 class HotspotScreen extends StatefulWidget {
   const HotspotScreen({super.key});
@@ -55,8 +56,45 @@ class _HotspotScreenState extends State<HotspotScreen> {
       ),
       floatingActionButton: _isMapView
           ? FloatingActionButton.extended(
-              onPressed: () {
-                // Logic to find near me
+              onPressed: () async {
+                try {
+                  bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+                  if (!serviceEnabled) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('위치 서비스가 비활성화되어 있습니다.')),
+                    );
+                    return;
+                  }
+
+                  LocationPermission permission = await Geolocator.checkPermission();
+                  if (permission == LocationPermission.denied) {
+                    permission = await Geolocator.requestPermission();
+                    if (permission == LocationPermission.denied) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('위치 권한이 거부되었습니다.')),
+                      );
+                      return;
+                    }
+                  }
+
+                  if (permission == LocationPermission.deniedForever) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('위치 권한이 영구적으로 거부되었습니다. 설정에서 변경해주세요.')),
+                    );
+                    return;
+                  }
+
+                  final position = await Geolocator.getCurrentPosition();
+                  mapController.animateCamera(
+                    CameraUpdate.newLatLng(
+                      LatLng(position.latitude, position.longitude),
+                    ),
+                  );
+                } catch (e) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('위치 확인 중 오류 발생: $e')),
+                  );
+                }
               },
               label: const Text('내 주변 찾기'),
               icon: const Icon(Icons.my_location),
