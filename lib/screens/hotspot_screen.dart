@@ -15,6 +15,28 @@ class HotspotScreen extends StatefulWidget {
 class _HotspotScreenState extends State<HotspotScreen> {
   bool _isMapView = false;
   late GoogleMapController mapController;
+  String _selectedRegion = '전체';
+
+  final List<String> _regions = [
+    '전체',
+    '서울',
+    '경기',
+    '인천',
+    '부산',
+    '대구',
+    '광주',
+    '대전',
+    '울산',
+    '세종',
+    '강원',
+    '충북',
+    '충남',
+    '전북',
+    '전남',
+    '경북',
+    '경남',
+    '제주',
+  ];
 
   final LatLng _center = const LatLng(37.5665, 126.9780); // Seoul City Hall
 
@@ -29,6 +51,32 @@ class _HotspotScreenState extends State<HotspotScreen> {
       appBar: AppBar(
         title: const Text('명당 찾기'),
         actions: [
+          // Region filter dropdown
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            child: DropdownButton<String>(
+              value: _selectedRegion,
+              dropdownColor: CloverTheme.primaryColor,
+              icon: const Icon(Icons.filter_list, color: Colors.white),
+              underline: Container(),
+              items: _regions.map((String region) {
+                return DropdownMenuItem<String>(
+                  value: region,
+                  child: Text(
+                    region,
+                    style: const TextStyle(color: Colors.white, fontSize: 14),
+                  ),
+                );
+              }).toList(),
+              onChanged: (String? newValue) {
+                if (newValue != null) {
+                  setState(() {
+                    _selectedRegion = newValue;
+                  });
+                }
+              },
+            ),
+          ),
           IconButton(
             icon: Icon(_isMapView ? Icons.list_rounded : Icons.map_rounded),
             onPressed: () {
@@ -49,9 +97,33 @@ class _HotspotScreenState extends State<HotspotScreen> {
             return const Center(child: Text('등록된 명당이 없습니다.'));
           }
 
+          // Filter spots based on selected region
+          final filteredSpots = _selectedRegion == '전체'
+              ? viewModel.spots
+              : viewModel.spots.where((spot) {
+                  return spot.address.contains(_selectedRegion);
+                }).toList();
+
+          if (filteredSpots.isEmpty) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(Icons.location_off, size: 64, color: Colors.grey),
+                  const SizedBox(height: 16),
+                  Text(
+                    '$_selectedRegion 지역의 명당이 없습니다.',
+                    style: const TextStyle(color: Colors.grey),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          // Pass filtered spots to map/list view
           return _isMapView
-              ? _buildMapView(viewModel)
-              : _buildListView(viewModel);
+              ? _buildMapView(filteredSpots)
+              : _buildListView(filteredSpots);
         },
       ),
       floatingActionButton: _isMapView
@@ -106,7 +178,7 @@ class _HotspotScreenState extends State<HotspotScreen> {
     );
   }
 
-  Widget _buildMapView(LottoSpotViewModel viewModel) {
+  Widget _buildMapView(List spots) {
     // Note: Ensure API Key is added to web/index.html for this to work on Web
     return GoogleMap(
       onMapCreated: _onMapCreated,
@@ -114,7 +186,7 @@ class _HotspotScreenState extends State<HotspotScreen> {
         target: _center,
         zoom: 11.0,
       ),
-      markers: viewModel.spots.map((spot) {
+      markers: spots.map((spot) {
         // Assuming spot has lat/lng, otherwise use random offset from center for demo
         // In real app, use spot.latitude and spot.longitude
         return Marker(
@@ -129,13 +201,13 @@ class _HotspotScreenState extends State<HotspotScreen> {
     );
   }
 
-  Widget _buildListView(LottoSpotViewModel viewModel) {
+  Widget _buildListView(List spots) {
     return ListView.separated(
       padding: const EdgeInsets.all(16),
-      itemCount: viewModel.spots.length,
+      itemCount: spots.length,
       separatorBuilder: (context, index) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
-        final spot = viewModel.spots[index];
+        final spot = spots[index];
         return Container(
           decoration: BoxDecoration(
             color: Colors.white,
