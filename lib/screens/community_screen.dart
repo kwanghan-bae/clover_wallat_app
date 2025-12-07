@@ -5,6 +5,7 @@ import 'package:clover_wallet_app/screens/create_post_screen.dart';
 import 'package:clover_wallet_app/utils/theme.dart';
 import 'package:intl/intl.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:clover_wallet_app/widgets/badge_widget.dart';
 
 class CommunityScreen extends StatefulWidget {
   const CommunityScreen({super.key});
@@ -109,9 +110,15 @@ class _CommunityScreenState extends State<CommunityScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(
-                                    post.authorName,
-                                    style: const TextStyle(fontWeight: FontWeight.bold),
+                                  Row(
+                                    children: [
+                                      Text(
+                                        post.authorName,
+                                        style: const TextStyle(fontWeight: FontWeight.bold),
+                                      ),
+                                      const SizedBox(width: 6),
+                                      BadgeWidget(badgeCodes: post.authorBadges),
+                                    ],
                                   ),
                                   Text(
                                     DateFormat('MM/dd HH:mm').format(post.createdAt),

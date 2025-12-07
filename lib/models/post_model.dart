@@ -24,44 +24,63 @@ class UserSummary {
 
 class PostModel {
   final int id;
+  final int userId;
+  final String authorName;
+  final List<String> authorBadges; // 작성자 뱃지 목록
   final String content;
-  final UserSummary? user;
   final DateTime createdAt;
+  final DateTime updatedAt;
   final int likeCount;
   final int viewCount;
   final bool isLiked;
 
   PostModel({
     required this.id,
+    required this.userId,
+    required this.authorName,
+    this.authorBadges = const [],
     required this.content,
-    this.user,
-    required this.createdAt,
-    this.likeCount = 0,
-    this.viewCount = 0,
+    required this.viewCount,
+    required this.likeCount,
     this.isLiked = false,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   Map<String, dynamic> toMap() {
     return {
       'id': id,
+      'userId': userId,
+      'authorName': authorName,
+      'authorBadges': authorBadges,
       'content': content,
-      'user': user, // This might need to be serialized properly if sent back
-      'createdAt': createdAt.toIso8601String(),
-      'likeCount': likeCount,
       'viewCount': viewCount,
+      'likeCount': likeCount,
       'isLiked': isLiked,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
     };
   }
 
   factory PostModel.fromMap(Map<String, dynamic> map) {
+    // Backend의 user 객체에서 작성자 정보 추출
+    final user = map['user'];
+    final String authorName = user != null ? user['nickname'] ?? 'Unknown' : 'Unknown';
+    final List<String> authorBadges = user != null && user['badges'] != null
+        ? List<String>.from(user['badges'])
+        : [];
+
     return PostModel(
-      id: map['id'] is int ? map['id'] : int.parse(map['id'].toString()),
+      id: map['id'],
+      userId: user?['id'] ?? 0,
+      authorName: authorName,
+      authorBadges: authorBadges,
       content: map['content'] ?? '',
-      user: map['user'] != null ? UserSummary.fromMap(map['user']) : null,
-      createdAt: map['createdAt'] != null ? DateTime.parse(map['createdAt']) : DateTime.now(),
-      likeCount: map['likeCount'] ?? 0,
       viewCount: map['viewCount'] ?? 0,
+      likeCount: map['likeCount'] ?? 0,
       isLiked: map['isLiked'] ?? false,
+      createdAt: DateTime.parse(map['createdAt']),
+      updatedAt: DateTime.parse(map['updatedAt']),
     );
   }
 
@@ -69,7 +88,4 @@ class PostModel {
 
   factory PostModel.fromJson(String source) =>
       PostModel.fromMap(json.decode(source));
-      
-  // Helper to get display name
-  String get authorName => user?.ssoQualifier ?? 'Unknown';
 }
