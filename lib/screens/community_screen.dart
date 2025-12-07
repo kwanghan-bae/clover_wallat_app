@@ -63,9 +63,41 @@ class _CommunityScreenState extends State<CommunityScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.chat_bubble_outline_rounded, size: 64, color: Colors.grey[300]),
-                  const SizedBox(height: 16),
-                  Text('첫 게시물을 작성해보세요!', style: TextStyle(color: Colors.grey[600])),
+                  Icon(Icons.chat_bubble_outline_rounded, size: 80, color: Colors.grey[300]),
+                  const SizedBox(height: 24),
+                  const Text(
+                    '아직 게시물이 없습니다',
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '첫 번째 게시물을 작성해보세요!',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 32),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const CreatePostScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.edit),
+                    label: const Text('게시물 작성하기'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: CloverTheme.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
                 ],
               ),
             );

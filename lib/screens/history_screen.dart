@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:clover_wallet_app/models/history_model.dart';
 import 'package:clover_wallet_app/viewmodels/history_viewmodel.dart';
+import 'package:clover_wallet_app/utils/theme.dart';
 import 'package:intl/intl.dart';
+import 'package:clover_wallet_app/screens/number_generation_screen.dart';
 import 'package:clover_wallet_app/screens/scan_screen.dart';
 
 class HistoryScreen extends StatelessWidget {
@@ -51,8 +53,50 @@ class HistoryScreen extends StatelessWidget {
       body: Consumer<HistoryViewModel>(
         builder: (context, viewModel, child) {
           if (viewModel.history.isEmpty) {
-            return const Center(
-              child: Text('저장된 로또 내역이 없습니다.'),
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.inbox_outlined, size: 80, color: Colors.grey[300]),
+                  const SizedBox(height: 24),
+                  const Text(
+                    '저장된 로또 내역이 없습니다',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    '번호를 생성하고 저장해보세요!',
+                    style: TextStyle(color: Colors.grey[600]),
+                  ),
+                  const SizedBox(height: 32),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NumberGenerationScreen(),
+                        ),
+                      );
+                    },
+                    icon: const Icon(Icons.casino_rounded),
+                    label: const Text('번호 생성하기'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: CloverTheme.primaryColor,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 24,
+                        vertical: 14,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             );
           }
           return ListView.builder(
