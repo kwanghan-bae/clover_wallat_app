@@ -9,6 +9,7 @@ import 'package:clover_wallet_app/screens/statistics_screen.dart';
 import 'package:clover_wallet_app/screens/community_screen.dart';
 import 'package:clover_wallet_app/screens/mypage_screen.dart';
 import 'package:clover_wallet_app/screens/notification_screen.dart';
+import 'package:clover_wallet_app/screens/travel_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -227,7 +228,10 @@ class DashboardTab extends StatelessWidget {
         _buildQuickActionItem(context, Icons.analytics_rounded, '번호 분석', Colors.orange, () {
           Navigator.push(context, MaterialPageRoute(builder: (context) => const StatisticsScreen()));
         }),
-        _buildQuickActionItem(context, Icons.map_rounded, '명당 찾기', Colors.red, () {
+        _buildQuickActionItem(context, Icons.travel_explore, '여행 플랜', Colors.purple, () {
+          Navigator.push(context, MaterialPageRoute(builder: (context) => const TravelScreen()));
+        }),
+        _buildQuickActionItem(context, Icons.store_rounded, '로또 명당', Colors.green, () {
           onTabChange(2); // Switch to Hotspot tab
         }),
       ],
