@@ -1,16 +1,12 @@
-import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:clover_wallet_app/utils/api_config.dart';
 import 'package:clover_wallet_app/services/auth_service.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:clover_wallet_app/services/api_client.dart';
 
 class UserStatsService {
-  Future<Map<String, dynamic>> getUserStats() async {
-    final user = Supabase.instance.client.auth.currentUser;
-    if (user == null) {
-      throw Exception('User not logged in');
-    }
+  final AuthenticatedClient _client = AuthenticatedClient();
 
+  Future<Map<String, dynamic>> getUserStats() async {
     // Get user ID from AuthService
     final userId = await AuthService().getUserId();
     if (userId == null) {
@@ -19,13 +15,9 @@ class UserStatsService {
 
     try {
       final url = Uri.parse('${ApiConfig.baseUrl}/api/v1/users/$userId/stats');
-      final session = Supabase.instance.client.auth.currentSession;
-      final token = session?.accessToken;
-
-      final response = await http.get(
+      final response = await _client.get(
         url,
         headers: {
-          'Authorization': 'Bearer $token',
           'Content-Type': 'application/json',
         },
       );

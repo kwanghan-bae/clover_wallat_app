@@ -1,18 +1,16 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:clover_wallet_app/models/post_model.dart';
 import 'package:clover_wallet_app/models/common_response.dart';
 import 'package:clover_wallet_app/utils/api_config.dart';
+import 'package:clover_wallet_app/services/api_client.dart';
 
 class CommunityApiService {
+  final AuthenticatedClient _client = AuthenticatedClient();
+
   Future<List<PostModel>> getPosts({int page = 0, int size = 10}) async {
     final url = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.communityPrefix}/posts?page=$page&size=$size');
     
-    final token = Supabase.instance.client.auth.currentSession?.accessToken;
-    final headers = token != null ? {'Authorization': 'Bearer $token'} : <String, String>{};
-
-    final response = await http.get(url, headers: headers);
+    final response = await _client.get(url);
 
     if (response.statusCode == 200) {
       final decodedBody = jsonDecode(utf8.decode(response.bodyBytes));
@@ -35,18 +33,13 @@ class CommunityApiService {
   Future<PostModel> createPost(String content) async {
     final url = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.communityPrefix}/posts');
     
-    final token = Supabase.instance.client.auth.currentSession?.accessToken;
-    if (token == null) throw Exception('No auth token found');
-
-    final response = await http.post(
+    final response = await _client.post(
       url,
       headers: {
-        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       },
       body: jsonEncode({
         'content': content,
-        // 'userId': ... // handled by backend via JWT
       }),
     );
 
@@ -71,13 +64,9 @@ class CommunityApiService {
   Future<PostModel> likePost(int postId) async {
     final url = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.communityPrefix}/posts/$postId/like');
     
-    final token = Supabase.instance.client.auth.currentSession?.accessToken;
-    if (token == null) throw Exception('No auth token found');
-
-    final response = await http.post(
+    final response = await _client.post(
       url,
       headers: {
-        'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       },
     );
