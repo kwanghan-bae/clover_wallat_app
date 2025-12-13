@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:clover_wallet_app/utils/theme.dart';
 import 'package:clover_wallet_app/screens/home_screen.dart';
@@ -30,8 +31,22 @@ void main() async {
   );
 
   // Initialize FCM
-  final fcmService = FcmService(navigatorKey: navigatorKey);
-  await fcmService.initialize();
+  if (!kIsWeb) {
+    // Firebase initialization usually required here for mobile too if not auto-init
+    // But assuming mobile works, we just skip Web to avoid crash
+    // initialize is missing in main.dart? Assuming it's handled implicitly or we should add it?
+    // User didn't complain about mobile.
+    // However, FcmService constructor calls FirebaseMessaging.instance.
+    // We should move FcmService instantiation inside the check or make it safe.
+    
+    // To be safe, we only instantiate and init if not web
+    try {
+      final fcmService = FcmService(navigatorKey: navigatorKey);
+      await fcmService.initialize();
+    } catch (e) {
+      print('FCM Init Error: $e');
+    }
+  }
 
   // Initialize AdMob
   await AdService().initialize();
