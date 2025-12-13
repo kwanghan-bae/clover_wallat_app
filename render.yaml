@@ -1,7 +1,8 @@
 services:
   # Static Site (완전 무료 / Always on)
-  - type: static
+  - type: web
     name: clover-wallet-app-web
+    runtime: static
     
     # 환경 변수
     envVars:
@@ -13,6 +14,6 @@ services:
     
     # 빌드 설정
     buildCommand: ./render_build.sh
-    publishDir: build/web
+    staticPublishPath: build/web
     
     # 리전 (Static Site는 Global CDN 사용하므로 리전 설정 불필요/자동)
