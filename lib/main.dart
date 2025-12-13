@@ -16,6 +16,7 @@ import 'package:clover_wallet_app/screens/login_screen.dart';
 
 import 'package:clover_wallet_app/services/auth_service.dart';
 import 'package:clover_wallet_app/services/fcm_service.dart';
+import 'package:clover_wallet_app/services/ad_service.dart';
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -31,6 +32,9 @@ void main() async {
   // Initialize FCM
   final fcmService = FcmService(navigatorKey: navigatorKey);
   await fcmService.initialize();
+
+  // Initialize AdMob
+  await AdService().initialize();
 
   runApp(
     MultiProvider(

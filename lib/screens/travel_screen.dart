@@ -15,9 +15,8 @@ class _TravelScreenState extends State<TravelScreen> {
   List<TravelPlanModel> _travelPlans = [];
   bool _isLoading = true;
 
-  // TODO: 외부 API 연동 (카카오 로컬, Google Places 등)으로 실시간 관광지/맛집 데이터 가져오기
-  // TODO: 테마별 필터링 UI 추가
-  // TODO: 사용자 위치 기반 추천 기능
+  // 여행지 데이터 로드 (현재는 Mock Data)
+  
   
   @override
   void initState() {
@@ -211,12 +210,16 @@ class _TravelScreenState extends State<TravelScreen> {
 
   Color _getThemeColor(String theme) {
     switch (theme) {
+      case 'HEALING':
       case '자연':
         return Colors.green;
+      case 'HISTORY':
       case '문화':
-        return Colors.purple;
+        return Colors.brown;
+      case 'FOOD':
       case '맛집':
         return Colors.orange;
+      case 'CITY':
       case '관광':
         return Colors.blue;
       default:

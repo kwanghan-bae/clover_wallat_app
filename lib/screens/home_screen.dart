@@ -10,6 +10,7 @@ import 'package:clover_wallet_app/screens/community_screen.dart';
 import 'package:clover_wallet_app/screens/mypage_screen.dart';
 import 'package:clover_wallet_app/screens/notification_screen.dart';
 import 'package:clover_wallet_app/screens/travel_screen.dart';
+import 'package:clover_wallet_app/widgets/banner_ad_widget.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -121,27 +122,35 @@ class DashboardTab extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Next Draw Info Card
-            _buildNextDrawCard(context),
-            const SizedBox(height: 24),
-            
-            // Quick Actions
-            const Text('빠른 실행', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            _buildQuickActionsGrid(context),
-            const SizedBox(height: 24),
+      body: Column(
+        children: [
+          Expanded(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(20.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Next Draw Info Card
+                  _buildNextDrawCard(context),
+                  const SizedBox(height: 24),
+                  
+                  // Quick Actions
+                  const Text('빠른 실행', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
+                  _buildQuickActionsGrid(context),
+                  const SizedBox(height: 24),
 
-            // Recent History Preview (Placeholder)
-            const Text('최근 당첨 결과', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 16),
-            _buildRecentHistoryCard(context),
-          ],
-        ),
+                  // Recent History Preview (Placeholder)
+                  const Text('최근 당첨 결과', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                  const SizedBox(height: 16),
+                  _buildRecentHistoryCard(context),
+                ],
+              ),
+            ),
+          ),
+          // 배너 광고
+          const BannerAdWidget(),
+        ],
       ),
     );
   }

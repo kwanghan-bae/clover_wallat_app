@@ -57,7 +57,8 @@ class TravelPlace {
   factory TravelPlace.fromMap(Map<String, dynamic> map) {
     return TravelPlace(
       name: map['name'],
-      type: map['type'],
+      // Backend uses 'category', Frontend used 'type'. Handle both.
+      type: map['category'] ?? map['type'] ?? 'unknown',
       lat: (map['lat'] as num).toDouble(),
       lng: (map['lng'] as num).toDouble(),
     );
@@ -66,11 +67,18 @@ class TravelPlace {
   String get typeIcon {
     switch (type) {
       case 'lotto_spot':
+      case '명당':
         return '🍀';
       case 'tourism':
+      case '명소':
         return '🏛️';
       case 'restaurant':
+      case '맛집':
+      case '카페':
         return '🍴';
+      case 'walking':
+      case '산책':
+        return '🚶';
       default:
         return '📍';
     }
