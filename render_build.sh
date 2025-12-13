@@ -1,5 +1,6 @@
 #!/bin/bash
 # Render Build Script for Flutter Web
+set -e # Exit immediately if a command exits with a non-zero status
 
 # 1. Install Flutter
 echo "Downloading Flutter SDK..."
@@ -22,4 +23,6 @@ echo "Building Flutter Web..."
 # --base-href is usually / if serving from root of custom domain or standard render subdomain
 flutter build web --release
 
-echo "Build complete. Output directory: build/web"
+echo "Build complete. Checking output directory:"
+ls -F build/web
+
