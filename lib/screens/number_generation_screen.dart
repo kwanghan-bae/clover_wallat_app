@@ -99,31 +99,6 @@ class _NumberGenerationScreenState extends State<NumberGenerationScreen> with Si
     }
   }
 
-  Future<void> _saveNumbers() async {
-    if (_generatedNumbers.isEmpty) return;
-
-    try {
-      await context.read<LottoApiService>().saveGame(_generatedNumbers);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('번호가 저장되었습니다! 내 로또 탭에서 확인하세요.'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('저장 실패: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
