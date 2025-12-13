@@ -26,3 +26,7 @@ flutter build web --release
 echo "Build complete. Checking output directory:"
 ls -F build/web
 
+# 6. Create 404.html for SPA fallback (copies index.html)
+echo "Creating 404.html for SPA routing..."
+cp build/web/index.html build/web/404.html
+
