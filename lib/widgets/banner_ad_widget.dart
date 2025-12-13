@@ -2,6 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:clover_wallet_app/services/ad_service.dart';
+import 'package:clover_wallet_app/widgets/web_ad_widget.dart';
 
 /// 배너 광고 위젯
 /// 화면 하단에 배치하여 사용
@@ -52,7 +53,7 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
   @override
   Widget build(BuildContext context) {
     if (kIsWeb) {
-      return const SizedBox.shrink(); // Web currently not supported or Ads disabled
+      return const WebAdWidget();
     }
 
     if (!_isAdLoaded || _bannerAd == null) {

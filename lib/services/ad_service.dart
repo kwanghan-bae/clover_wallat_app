@@ -1,6 +1,6 @@
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:flutter/foundation.dart';
-import 'dart:io';
+import 'package:clover_wallet_app/utils/platform_check.dart';
 
 /// 광고 관리 서비스 (싱글톤)
 /// Google AdMob을 통한 배너 및 리워드 광고 관리
@@ -26,23 +26,24 @@ class AdService {
   /// 배너 광고 단위 ID
   String get bannerAdUnitId {
     if (kIsWeb) return ''; // Web not supported
-    if (Platform.isAndroid) {
+    if (isAndroid) {
       return _androidBannerAdUnitId;
-    } else if (Platform.isIOS) {
+    } else if (isIOS) {
       return _iosBannerAdUnitId;
     }
-    throw UnsupportedError('Unsupported platform');
+    // Return empty or throw based on preference, but throwing might crash if called on other platforms
+    return ''; 
   }
 
   /// 리워드 광고 단위 ID
   String get rewardedAdUnitId {
     if (kIsWeb) return ''; // Web not supported
-    if (Platform.isAndroid) {
+    if (isAndroid) {
       return _androidRewardedAdUnitId;
-    } else if (Platform.isIOS) {
+    } else if (isIOS) {
       return _iosRewardedAdUnitId;
     }
-    throw UnsupportedError('Unsupported platform');
+    return '';
   }
 
   /// AdMob 초기화
