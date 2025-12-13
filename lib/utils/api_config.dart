@@ -20,4 +20,5 @@ class ApiConfig {
   static const String lottoPrefix = '/api/v1/lotto';
   static const String authPrefix = '/api/v1/auth';
   static const String ticketPrefix = '/api/v1/tickets';
+  static const String travelPlansPrefix = '/api/v1/travel-plans';
 }

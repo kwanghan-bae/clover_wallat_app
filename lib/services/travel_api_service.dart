@@ -1,9 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
+import 'package:clover_wallet_app/utils/api_config.dart';
 import 'package:clover_wallet_app/models/travel_plan_model.dart';
 
 class TravelApiService {
-  final String baseUrl = 'http://localhost:8080/api/v1/travel-plans';
+  String get baseUrl => '${ApiConfig.baseUrl}${ApiConfig.travelPlansPrefix}';
 
   Future<List<TravelPlanModel>> getAllTravelPlans() async {
     try {
