@@ -21,10 +21,11 @@ class LottoInfoService {
         }
       }
       
-      // Fallback to mock data
-      return _getMockData();
+      // Fallback to empty or throw
+      throw Exception('Failed to load next draw info');
     } catch (e) {
-      return _getMockData();
+      // Re-throw to allow UI to handle error
+      rethrow;
     }
   }
 
@@ -49,18 +50,7 @@ class LottoInfoService {
       throw Exception('Failed to load draw result');
     } catch (e) {
       // Return empty map or rethrow to handle UI side
-      // For now, returning empty map to indicate failure/no data
       return {};
     }
-  }
-
-  Map<String, dynamic> _getMockData() {
-    return {
-      'currentRound': 1100,
-      'daysLeft': 3,
-      'hoursLeft': 12,
-      'minutesLeft': 30,
-      'estimatedJackpot': 30000000000,
-    };
   }
 }

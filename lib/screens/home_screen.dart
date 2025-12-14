@@ -156,72 +156,47 @@ class DashboardTab extends StatelessWidget {
   }
 
   Widget _buildNextDrawCard(BuildContext context) {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: LottoInfoService().getNextDrawInfo(),
       builder: (context, snapshot) {
-        final data = snapshot.data ?? {
-          'currentRound': 1100,
-          'daysLeft': 0,
-          'hoursLeft': 0,
-          'minutesLeft': 0,
-        };
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            height: 200,
+            decoration: BoxDecoration(
+              gradient: CloverTheme.primaryGradient,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: const Center(child: CircularProgressIndicator(color: Colors.white)),
+          );
+        }
 
-        return Container(
-          padding: const EdgeInsets.all(24),
-          decoration: BoxDecoration(
-            gradient: CloverTheme.primaryGradient,
-            borderRadius: BorderRadius.circular(24),
-            boxShadow: CloverTheme.softShadow,
-          ),
-          child: Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(20),
+        if (snapshot.hasError || !snapshot.hasData) {
+           return Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: CloverTheme.primaryGradient,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Column(
+              children: [
+                const Icon(Icons.error_outline_rounded, color: Colors.white, size: 48),
+                const SizedBox(height: 16),
+                const Text('정보를 불러올 수 없습니다', style: TextStyle(color: Colors.white)),
+                const SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () {
+                    (context as Element).markNeedsBuild();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: CloverTheme.primaryColor,
+                  ),
+                  child: const Text('다시 시도'),
                 ),
-                child: Text(
-                  '제 ${data['currentRound']} 회',
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-                ),
-              ),
-              const SizedBox(height: 16),
-              const Text(
-                '당첨 발표까지',
-                style: TextStyle(color: Colors.white70, fontSize: 14),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                '${data['daysLeft']}일 ${data['hoursLeft']}시간 ${data['minutesLeft']}분',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 32,
-                  fontWeight: FontWeight.w900,
-                  letterSpacing: -0.5,
-                ),
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => const NumberGenerationScreen()),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.white,
-                  foregroundColor: CloverTheme.primaryColor,
-                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-                ),
-                child: const Text('번호 생성하기', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-              ),
-            ],
-          ),
-        );
-      },
-    );
+              ],
+            ),
+          );
+        }
+
+        final data = snapshot.data!;
   }
 
   Widget _buildQuickActionsGrid(BuildContext context) {
