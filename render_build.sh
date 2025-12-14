@@ -23,10 +23,17 @@ echo "Building Flutter Web..."
 # --base-href is usually / if serving from root of custom domain or standard render subdomain
 flutter build web --release
 
-echo "Build complete. Checking output directory:"
-ls -F build/web
+echo "Build complete."
 
-# 6. Create 404.html for SPA fallback (copies index.html)
-echo "Creating 404.html for SPA routing..."
-cp build/web/index.html build/web/404.html
+# 6. Prepare Publish Directory (public)
+# Sometimes build/ folder is ignored or volatile. Copying to a clean 'public' folder.
+rm -rf public
+mkdir -p public
+cp -R build/web/* public/
+
+# 7. Create 404.html for SPA fallback
+cp public/index.html public/404.html
+
+echo "Contents of public directory:"
+ls -F public/
 
