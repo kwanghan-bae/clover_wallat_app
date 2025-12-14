@@ -27,30 +27,37 @@ class MyPageScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            // Profile Card
-            _buildProfileCard(context, name, email),
-            const SizedBox(height: 24),
+      body: FutureBuilder<Map<String, dynamic>>(
+        future: UserStatsService().getUserStats(),
+        builder: (context, snapshot) {
+          final stats = snapshot.data ?? {'totalWinnings': 0, 'roi': 0, 'totalGames': 0};
+          
+          return SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              children: [
+                // Profile Card
+                _buildProfileCard(context, name, email),
+                const SizedBox(height: 24),
 
-            // Badges Section
-            _buildSectionHeader('나의 뱃지'),
-            const SizedBox(height: 12),
-            _buildBadgesSection(),
-            const SizedBox(height: 24),
+                // Badges Section
+                _buildSectionHeader('나의 뱃지'),
+                const SizedBox(height: 12),
+                _buildBadgesSection(stats),
+                const SizedBox(height: 24),
 
-            // Stats Section
-            _buildSectionHeader('당첨 통계'),
-            const SizedBox(height: 12),
-            _buildStatsGrid(),
-            const SizedBox(height: 24),
+                // Stats Section
+                _buildSectionHeader('당첨 통계'),
+                const SizedBox(height: 12),
+                _buildStatsGrid(stats),
+                const SizedBox(height: 24),
 
-            // Menu
-            _buildMenuSection(context),
-          ],
-        ),
+                // Menu
+                _buildMenuSection(context),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -108,14 +115,72 @@ class MyPageScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildBadgesSection() {
-    // Mock Badges
-    final badges = [
-      {'icon': Icons.emoji_events_rounded, 'label': '첫 당첨', 'color': Colors.amber},
-      {'icon': Icons.local_fire_department_rounded, 'label': '열정', 'color': Colors.redAccent},
-      {'icon': Icons.verified_rounded, 'label': '인증됨', 'color': Colors.blue},
-      {'icon': Icons.star_rounded, 'label': 'VIP', 'color': Colors.purple},
-    ];
+  Widget _buildStatsGrid(Map<String, dynamic> stats) {
+    final totalWinnings = stats['totalWinnings'] as int? ?? 0;
+    final roi = stats['roi'] as int? ?? 0;
+
+    return Row(
+      children: [
+        Expanded(
+          child: _buildStatCard(
+            '총 당첨금',
+            '₩ ${_formatCurrency(totalWinnings)}',
+            Colors.green,
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildStatCard('수익률', '${roi >= 0 ? '+' : ''}$roi%', roi >= 0 ? Colors.green : Colors.red),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBadgesSection(Map<String, dynamic> stats) {
+    final List<Map<String, dynamic>> badges = [];
+    final user = Supabase.instance.client.auth.currentUser;
+
+    // Badge Logic
+    // 1. First Win
+    if ((stats['totalWinnings'] as num? ?? 0) > 0) {
+      badges.add({'icon': Icons.emoji_events_rounded, 'label': '첫 당첨', 'color': Colors.amber});
+    }
+
+    // 2. Passion (Played 5+ games)
+    if ((stats['totalGames'] as num? ?? 0) >= 5) {
+      badges.add({'icon': Icons.local_fire_department_rounded, 'label': '열정', 'color': Colors.redAccent});
+    }
+
+    // 3. Verified (Email confirmed)
+    if (user?.emailConfirmedAt != null) {
+      badges.add({'icon': Icons.verified_rounded, 'label': '인증됨', 'color': Colors.blue});
+    }
+
+    // 4. VIP (Winnings > 1,000,000)
+    if ((stats['totalWinnings'] as num? ?? 0) >= 1000000) {
+      badges.add({'icon': Icons.star_rounded, 'label': 'VIP', 'color': Colors.purple});
+    }
+
+    if (badges.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        decoration: BoxDecoration(
+          color: Colors.grey[100],
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          children: [
+            Icon(Icons.lock_outline_rounded, color: Colors.grey[400], size: 32),
+            const SizedBox(height: 8),
+            Text(
+              '아직 획득한 뱃지가 없어요',
+              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+            ),
+          ],
+        ),
+      );
+    }
 
     return SizedBox(
       height: 100,
@@ -144,43 +209,6 @@ class MyPageScreen extends StatelessWidget {
           );
         },
       ),
-    );
-  }
-
-  Widget _buildStatsGrid() {
-    return FutureBuilder<Map<String, dynamic>>(
-      future: UserStatsService().getUserStats(),
-      builder: (context, snapshot) {
-        if (!snapshot.hasData) {
-          return Row(
-            children: [
-              Expanded(child: _buildStatCard('총 당첨금', '로딩중...', Colors.green)),
-              const SizedBox(width: 16),
-              Expanded(child: _buildStatCard('수익률', '로딩중...', Colors.red)),
-            ],
-          );
-        }
-
-        final stats = snapshot.data!;
-        final totalWinnings = stats['totalWinnings'] as int;
-        final roi = stats['roi'] as int;
-
-        return Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                '총 당첨금',
-                '₩ ${_formatCurrency(totalWinnings)}',
-                Colors.green,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: _buildStatCard('수익률', '${roi >= 0 ? '+' : ''}$roi%', roi >= 0 ? Colors.green : Colors.red),
-            ),
-          ],
-        );
-      },
     );
   }
 
