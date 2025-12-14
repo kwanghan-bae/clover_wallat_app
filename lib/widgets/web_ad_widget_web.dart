@@ -29,8 +29,8 @@ class _WebAdWidgetState extends State<WebAdWidget> {
       final html.Element ins = html.Element.tag('ins')
         ..classes.add('adsbygoogle')
         ..style.display = 'block'
-        ..setAttribute('data-ad-client', 'ca-pub-XXXXXXXXXXXXXXXX') // Replace with real ID later or use env
-        ..setAttribute('data-ad-slot', '1234567890') // Placeholder slot
+        ..setAttribute('data-ad-client', 'ca-pub-2084827050289409')
+        // ..setAttribute('data-ad-slot', 'YOUR_AD_SLOT_ID') // Optional: Add slot ID if using specific units
         ..setAttribute('data-ad-format', 'auto')
         ..setAttribute('data-full-width-responsive', 'true');
 
