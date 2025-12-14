@@ -14,7 +14,9 @@ services:
     
     # 빌드 설정
     buildCommand: ./render_build.sh
-    staticPublishPath: build/web
+    # 빌드 설정
+    buildCommand: ./render_build.sh
+    staticPublishPath: public
     
     # 리전 (Static Site는 Global CDN 사용하므로 리전 설정 불필요/자동)
     routes:
