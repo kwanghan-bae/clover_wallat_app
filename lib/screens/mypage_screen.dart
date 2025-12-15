@@ -5,7 +5,7 @@ import 'package:clover_wallet_app/screens/notification_settings_screen.dart';
 import 'package:clover_wallet_app/screens/privacy_policy_screen.dart';
 import 'package:clover_wallet_app/services/user_stats_service.dart';
 import 'package:clover_wallet_app/services/user_service.dart';
-
+import 'package:clover_wallet_app/widgets/glass_card.dart';
 
 class MyPageScreen extends StatelessWidget {
   const MyPageScreen({super.key});
@@ -17,68 +17,83 @@ class MyPageScreen extends StatelessWidget {
     final name = user?.userMetadata?['full_name'] ?? '사용자';
 
     return Scaffold(
-      backgroundColor: CloverTheme.backgroundLight,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: const Text('마이페이지'),
+        title: const Text('마이페이지', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        iconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings_rounded),
+            icon: const Icon(Icons.settings_rounded, color: Colors.white),
             onPressed: () {},
           ),
         ],
       ),
-      body: FutureBuilder<Map<String, dynamic>>(
-        future: UserStatsService().getUserStats(),
-        builder: (context, snapshot) {
-          final stats = snapshot.data ?? {'totalWinnings': 0, 'roi': 0, 'totalGames': 0};
-          
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              children: [
-                // Profile Card
-                _buildProfileCard(context, name, email),
-                const SizedBox(height: 24),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: CloverTheme.primaryGradient,
+        ),
+        child: FutureBuilder<Map<String, dynamic>>(
+          future: UserStatsService().getUserStats(),
+          builder: (context, snapshot) {
+            final stats = snapshot.data ?? {'totalWinnings': 0, 'roi': 0, 'totalGames': 0};
+            
+            return SafeArea(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  children: [
+                    // Profile Card
+                    _buildProfileCard(context, name, email),
+                    const SizedBox(height: 24),
 
-                // Badges Section
-                _buildSectionHeader('나의 뱃지'),
-                const SizedBox(height: 12),
-                _buildBadgesSection(stats),
-                const SizedBox(height: 24),
+                    // Badges Section
+                    _buildSectionHeader('나의 뱃지'),
+                    const SizedBox(height: 12),
+                    _buildBadgesSection(stats),
+                    const SizedBox(height: 24),
 
-                // Stats Section
-                _buildSectionHeader('당첨 통계'),
-                const SizedBox(height: 12),
-                _buildStatsGrid(stats),
-                const SizedBox(height: 24),
+                    // Stats Section
+                    _buildSectionHeader('당첨 통계'),
+                    const SizedBox(height: 12),
+                    _buildStatsGrid(stats),
+                    const SizedBox(height: 24),
 
-                // Menu
-                _buildMenuSection(context),
-              ],
-            ),
-          );
-        },
+                    // Menu
+                    _buildMenuSection(context),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
       ),
     );
   }
 
   Widget _buildProfileCard(BuildContext context, String name, String email) {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        gradient: CloverTheme.primaryGradient,
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: CloverTheme.softShadow,
-      ),
+    return GlassCard(
+      opacity: 0.15,
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 32,
-            backgroundColor: Colors.white,
-            child: Text(
-              name[0].toUpperCase(),
-              style: const TextStyle(
-                  fontSize: 24, fontWeight: FontWeight.bold, color: CloverTheme.primaryColor),
+          Container(
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(color: Colors.white.withOpacity(0.5), width: 2),
+            ),
+            child: CircleAvatar(
+              radius: 30,
+              backgroundColor: Colors.white.withOpacity(0.2),
+              child: Text(
+                name.isNotEmpty ? name[0].toUpperCase() : 'U',
+                style: const TextStyle(
+                  fontSize: 24, 
+                  fontWeight: FontWeight.bold, 
+                  color: Colors.white
+                ),
+              ),
             ),
           ),
           const SizedBox(width: 20),
@@ -109,7 +124,11 @@ class MyPageScreen extends StatelessWidget {
       children: [
         Text(
           title,
-          style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          style: const TextStyle(
+            fontSize: 18, 
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
         ),
       ],
     );
@@ -125,12 +144,16 @@ class MyPageScreen extends StatelessWidget {
           child: _buildStatCard(
             '총 당첨금',
             '₩ ${_formatCurrency(totalWinnings)}',
-            Colors.green,
+            const Color(0xFF4CAF50), // Brighter Green
           ),
         ),
         const SizedBox(width: 16),
         Expanded(
-          child: _buildStatCard('수익률', '${roi >= 0 ? '+' : ''}$roi%', roi >= 0 ? Colors.green : Colors.red),
+          child: _buildStatCard(
+            '수익률', 
+            '${roi >= 0 ? '+' : ''}$roi%', 
+            roi >= 0 ? const Color(0xFF4CAF50) : const Color(0xFFFF5252),
+          ),
         ),
       ],
     );
@@ -140,72 +163,72 @@ class MyPageScreen extends StatelessWidget {
     final List<Map<String, dynamic>> badges = [];
     final user = Supabase.instance.client.auth.currentUser;
 
-    // Badge Logic
-    // 1. First Win
     if ((stats['totalWinnings'] as num? ?? 0) > 0) {
       badges.add({'icon': Icons.emoji_events_rounded, 'label': '첫 당첨', 'color': Colors.amber});
     }
-
-    // 2. Passion (Played 5+ games)
     if ((stats['totalGames'] as num? ?? 0) >= 5) {
       badges.add({'icon': Icons.local_fire_department_rounded, 'label': '열정', 'color': Colors.redAccent});
     }
-
-    // 3. Verified (Email confirmed)
     if (user?.emailConfirmedAt != null) {
-      badges.add({'icon': Icons.verified_rounded, 'label': '인증됨', 'color': Colors.blue});
+      badges.add({'icon': Icons.verified_rounded, 'label': '인증됨', 'color': Colors.blueAccent});
     }
-
-    // 4. VIP (Winnings > 1,000,000)
     if ((stats['totalWinnings'] as num? ?? 0) >= 1000000) {
-      badges.add({'icon': Icons.star_rounded, 'label': 'VIP', 'color': Colors.purple});
+      badges.add({'icon': Icons.star_rounded, 'label': 'VIP', 'color': Colors.purpleAccent});
     }
 
     if (badges.isEmpty) {
-      return Container(
-        width: double.infinity,
-        padding: const EdgeInsets.symmetric(vertical: 24),
-        decoration: BoxDecoration(
-          color: Colors.grey[100],
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          children: [
-            Icon(Icons.lock_outline_rounded, color: Colors.grey[400], size: 32),
-            const SizedBox(height: 8),
-            Text(
-              '아직 획득한 뱃지가 없어요',
-              style: TextStyle(color: Colors.grey[600], fontSize: 14),
-            ),
-          ],
+      return GlassCard(
+        opacity: 0.1,
+        child: Center(
+          child: Column(
+            children: [
+              Icon(Icons.lock_outline_rounded, color: Colors.white60, size: 32),
+              const SizedBox(height: 8),
+              const Text(
+                '아직 획득한 뱃지가 없어요',
+                style: TextStyle(color: Colors.white60, fontSize: 14),
+              ),
+            ],
+          ),
         ),
       );
     }
 
     return SizedBox(
-      height: 100,
+      height: 110,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: badges.length,
         separatorBuilder: (context, index) => const SizedBox(width: 16),
         itemBuilder: (context, index) {
           final badge = badges[index];
-          return Column(
-            children: [
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: (badge['color'] as Color).withOpacity(0.1),
-                  shape: BoxShape.circle,
+          return GlassCard(
+            width: 100,
+            padding: const EdgeInsets.all(12),
+            borderRadius: 20,
+            opacity: 0.15,
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: (badge['color'] as Color).withOpacity(0.2),
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(badge['icon'] as IconData, color: badge['color'] as Color, size: 24),
                 ),
-                child: Icon(badge['icon'] as IconData, color: badge['color'] as Color, size: 32),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                badge['label'] as String,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
-              ),
-            ],
+                const SizedBox(height: 8),
+                Text(
+                  badge['label'] as String,
+                  style: const TextStyle(
+                    fontSize: 12, 
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            ),
           );
         },
       ),
@@ -223,17 +246,12 @@ class MyPageScreen extends StatelessWidget {
   }
 
   Widget _buildStatCard(String label, String value, Color color) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: CloverTheme.softShadow,
-      ),
+    return GlassCard(
+      opacity: 0.15,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(label, style: const TextStyle(color: Colors.grey, fontSize: 14)),
+          Text(label, style: const TextStyle(color: Colors.white70, fontSize: 14)),
           const SizedBox(height: 8),
           Text(
             value,
@@ -245,12 +263,9 @@ class MyPageScreen extends StatelessWidget {
   }
 
   Widget _buildMenuSection(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: CloverTheme.softShadow,
-      ),
+    return GlassCard(
+      opacity: 0.15,
+      padding: EdgeInsets.zero, // Custom padding for list items
       child: Column(
         children: [
           _buildMenuItem(Icons.notifications_outlined, '알림 설정', onTap: () {
@@ -259,30 +274,34 @@ class MyPageScreen extends StatelessWidget {
               MaterialPageRoute(builder: (context) => const NotificationSettingsScreen()),
             );
           }),
-          const Divider(height: 1),
+          Divider(height: 1, color: Colors.white.withOpacity(0.1)),
           _buildMenuItem(Icons.privacy_tip_outlined, '개인정보 처리방침', onTap: () {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const PrivacyPolicyScreen()),
             );
           }),
-          const Divider(height: 1),
+          Divider(height: 1, color: Colors.white.withOpacity(0.1)),
           _buildMenuItem(Icons.info_outline_rounded, '앱 정보'),
-          const Divider(height: 1),
+          Divider(height: 1, color: Colors.white.withOpacity(0.1)),
           _buildMenuItem(Icons.logout_rounded, '로그아웃', onTap: () async {
             await Supabase.instance.client.auth.signOut();
           }),
-          const Divider(height: 1),
+          Divider(height: 1, color: Colors.white.withOpacity(0.1)),
           _buildMenuItem(Icons.person_off_rounded, '회원 탈퇴', isDestructive: true, onTap: () {
             showDialog(
               context: context,
               builder: (context) => AlertDialog(
-                title: const Text('회원 탈퇴'),
-                content: const Text('정말로 탈퇴하시겠습니까?\n모든 데이터가 즉시 삭제되며 복구할 수 없습니다.'),
+                backgroundColor: const Color(0xFF2C3E50),
+                title: const Text('회원 탈퇴', style: TextStyle(color: Colors.white)),
+                content: const Text(
+                  '정말로 탈퇴하시겠습니까?\n모든 데이터가 즉시 삭제되며 복구할 수 없습니다.',
+                  style: TextStyle(color: Colors.white70),
+                ),
                 actions: [
                   TextButton(
                     onPressed: () => Navigator.pop(context),
-                    child: const Text('취소'),
+                    child: const Text('취소', style: TextStyle(color: Colors.white)),
                   ),
                   TextButton(
                     onPressed: () async {
@@ -301,7 +320,7 @@ class MyPageScreen extends StatelessWidget {
                         }
                       }
                     },
-                    child: const Text('탈퇴', style: TextStyle(color: Colors.red)),
+                    child: const Text('탈퇴', style: TextStyle(color: Colors.redAccent)),
                   ),
                 ],
               ),
@@ -314,15 +333,18 @@ class MyPageScreen extends StatelessWidget {
 
   Widget _buildMenuItem(IconData icon, String label, {bool isDestructive = false, VoidCallback? onTap}) {
     return ListTile(
-      leading: Icon(icon, color: isDestructive ? Colors.red : Colors.grey[700]),
+      leading: Icon(
+        icon, 
+        color: isDestructive ? const Color(0xFFFF5252) : Colors.white70
+      ),
       title: Text(
         label,
         style: TextStyle(
-          color: isDestructive ? Colors.red : Colors.black87,
+          color: isDestructive ? const Color(0xFFFF5252) : Colors.white,
           fontWeight: FontWeight.w500,
         ),
       ),
-      trailing: const Icon(Icons.chevron_right_rounded, color: Colors.grey),
+      trailing: const Icon(Icons.chevron_right_rounded, color: Colors.white30),
       onTap: onTap,
     );
   }
