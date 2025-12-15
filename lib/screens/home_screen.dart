@@ -46,16 +46,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Global Gradient Background
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: CloverTheme.primaryGradient,
-        ),
-        child: _screens[_selectedIndex],
-      ),
+      backgroundColor: CloverTheme.backgroundLight, // Revert to light background
+      body: _screens[_selectedIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white.withOpacity(0.9),
+          color: Colors.white,
           boxShadow: [
             BoxShadow(
               color: Colors.black.withOpacity(0.05),
@@ -74,10 +69,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
           currentIndex: _selectedIndex,
           selectedItemColor: CloverTheme.primaryColor,
-          unselectedItemColor: Colors.grey,
+          unselectedItemColor: CloverTheme.textGrey,
           showUnselectedLabels: true,
           type: BottomNavigationBarType.fixed,
-          backgroundColor: Colors.transparent, // Handled by container
+          backgroundColor: Colors.white,
           elevation: 0,
           onTap: _onItemTapped,
         ),
@@ -109,22 +104,23 @@ class DashboardTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.transparent, // Let gradient show through
+      backgroundColor: Colors.transparent, 
       appBar: AppBar(
         backgroundColor: Colors.transparent,
+        elevation: 0,
         title: Row(
           children: [
-            Icon(Icons.filter_vintage, color: Colors.white.withOpacity(0.9)),
+            Icon(Icons.filter_vintage, color: CloverTheme.primaryColor),
             const SizedBox(width: 8),
             const Text(
               'Clover Wallet',
-              style: TextStyle(fontWeight: FontWeight.w800, color: Colors.white),
+              style: TextStyle(fontWeight: FontWeight.w800, color: Colors.black87),
             ),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none_rounded, color: Colors.white),
+            icon: const Icon(Icons.notifications_none_rounded, color: Colors.black87),
             onPressed: () {
               Navigator.push(
                 context,
@@ -142,7 +138,7 @@ class DashboardTab extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Next Draw Info Card - Highlighted
+                  // Next Draw Info Card - Hero Section (Gradient)
                   _buildNextDrawCard(context),
                   const SizedBox(height: 32),
                   
@@ -152,7 +148,7 @@ class DashboardTab extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Colors.black87,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -165,7 +161,7 @@ class DashboardTab extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                      color: Colors.black87,
                     ),
                   ),
                   const SizedBox(height: 16),
@@ -186,15 +182,28 @@ class DashboardTab extends StatelessWidget {
       future: LottoInfoService().getNextDrawInfo(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return const GlassCard(
-            height: 220,
-            child: Center(child: CircularProgressIndicator(color: Colors.white)),
+          return Container(
+            height: 250, // Increased Height
+            decoration: BoxDecoration(
+               gradient: CloverTheme.primaryGradient,
+               borderRadius: BorderRadius.circular(24),
+               boxShadow: CloverTheme.softShadow,
+            ),
+            child: const Center(child: CircularProgressIndicator(color: Colors.white)),
           );
         }
 
         if (snapshot.hasError || !snapshot.hasData) {
-           return GlassCard(
+           return Container(
+            height: 250,
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              gradient: CloverTheme.primaryGradient,
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: CloverTheme.softShadow,
+            ),
             child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 const Icon(Icons.error_outline_rounded, color: Colors.white70, size: 48),
                 const SizedBox(height: 16),
@@ -217,13 +226,19 @@ class DashboardTab extends StatelessWidget {
 
         final data = snapshot.data!;
         
-        return GlassCard(
-          opacity: 0.2, // Slightly more opaque for emphasis
-          border: Border.all(color: Colors.white.withOpacity(0.5), width: 1.5),
+        // Hero Card uses Gradient explicitly
+        return Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32), // More padding
+          decoration: BoxDecoration(
+            gradient: CloverTheme.primaryGradient,
+            borderRadius: BorderRadius.circular(24),
+            boxShadow: CloverTheme.softShadow,
+          ),
           child: Column(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
                   color: Colors.white.withOpacity(0.2),
                   borderRadius: BorderRadius.circular(20),
@@ -234,17 +249,17 @@ class DashboardTab extends StatelessWidget {
                   style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                 ),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 24),
               const Text(
                 '당첨 발표까지',
-                style: TextStyle(color: Colors.white70, fontSize: 14),
+                style: TextStyle(color: Colors.white70, fontSize: 16),
               ),
-              const SizedBox(height: 4),
+              const SizedBox(height: 8),
               Text(
                 '${data['daysLeft']}일 ${data['hoursLeft']}시간 ${data['minutesLeft']}분',
                 style: const TextStyle(
                   color: Colors.white,
-                  fontSize: 36,
+                  fontSize: 42, // Bigger Font
                   fontWeight: FontWeight.w900,
                   letterSpacing: -1.0,
                   shadows: [
@@ -256,7 +271,7 @@ class DashboardTab extends StatelessWidget {
                   ]
                 ),
               ),
-              const SizedBox(height: 20),
+              const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () {
                   Navigator.push(
@@ -267,12 +282,12 @@ class DashboardTab extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.white,
                   foregroundColor: CloverTheme.primaryColor,
-                  padding: const EdgeInsets.symmetric(horizontal: 40, vertical: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 18),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                   elevation: 5,
                   shadowColor: Colors.black45,
                 ),
-                child: const Text('번호 생성하기', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                child: const Text('번호 생성하기', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
             ],
           ),
@@ -286,19 +301,19 @@ class DashboardTab extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildQuickActionItem(context, Icons.casino_rounded, '번호 추첨', Colors.purpleAccent, () {
+        _buildQuickActionItem(context, Icons.casino_rounded, '번호 추첨', Colors.purple, () {
           Navigator.push(context, MaterialPageRoute(builder: (context) => const NumberGenerationScreen()));
         }),
-        _buildQuickActionItem(context, Icons.qr_code_scanner_rounded, 'QR 스캔', Colors.blueAccent, () {
+        _buildQuickActionItem(context, Icons.qr_code_scanner_rounded, 'QR 스캔', Colors.blue, () {
           Navigator.push(context, MaterialPageRoute(builder: (context) => const QrScanScreen()));
         }),
-        _buildQuickActionItem(context, Icons.analytics_rounded, '번호 분석', Colors.orangeAccent, () {
+        _buildQuickActionItem(context, Icons.analytics_rounded, '번호 분석', Colors.orange, () {
           Navigator.push(context, MaterialPageRoute(builder: (context) => const StatisticsScreen()));
         }),
-        _buildQuickActionItem(context, Icons.travel_explore, '여행 플랜', Colors.cyanAccent, () {
+        _buildQuickActionItem(context, Icons.travel_explore, '여행 플랜', Colors.cyan, () {
           Navigator.push(context, MaterialPageRoute(builder: (context) => const TravelScreen()));
         }),
-        _buildQuickActionItem(context, Icons.store_rounded, '로또 명당', Colors.greenAccent, () {
+        _buildQuickActionItem(context, Icons.store_rounded, '로또 명당', Colors.green, () {
           onTabChange(2); // Switch to Hotspot tab
         }),
       ],
@@ -310,19 +325,21 @@ class DashboardTab extends StatelessWidget {
       onTap: onTap,
       child: Column(
         children: [
-          GlassCard(
-            borderRadius: 20,
+          Container(
             padding: const EdgeInsets.all(16),
-            onTap: onTap, // Ripple effect
-            child: Icon(icon, color: color, size: 28),
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.1), // Light pastel background
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Icon(icon, color: color, size: 32), // Colored Icon
           ),
           const SizedBox(height: 8),
           Text(
             label,
             style: const TextStyle(
               fontWeight: FontWeight.w600,
-              fontSize: 12,
-              color: Colors.white,
+              fontSize: 13,
+              color: Colors.black87,
             ),
           ),
         ],
@@ -331,19 +348,24 @@ class DashboardTab extends StatelessWidget {
   }
 
   Widget _buildRecentHistoryCard(BuildContext context) {
-    return GlassCard(
-      padding: const EdgeInsets.all(20),
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: CloverTheme.softShadow,
+      ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.1),
+              color: Colors.grey[100],
               borderRadius: BorderRadius.circular(16),
             ),
-            child: const Icon(Icons.receipt_long_rounded, color: Colors.white),
+            child: const Icon(Icons.receipt_long_rounded, color: Colors.grey),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 20),
           const Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -353,21 +375,21 @@ class DashboardTab extends StatelessWidget {
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
-                    color: Colors.white,
+                    color: Colors.black87,
                   ),
                 ),
                 SizedBox(height: 4),
                 Text(
                   '아직 구매한 로또가 없습니다.',
                   style: TextStyle(
-                    color: Colors.white70,
+                    color: Colors.grey,
                     fontSize: 14,
                   ),
                 ),
               ],
             ),
           ),
-          const Icon(Icons.chevron_right_rounded, color: Colors.white70),
+          const Icon(Icons.chevron_right_rounded, color: Colors.grey),
         ],
       ),
     );
