@@ -21,9 +21,7 @@ class _WebAdWidgetState extends State<WebAdWidget> {
         ..id = 'ad-container-$viewId'
         ..style.width = '100%'
         ..style.height = '100%'
-        ..style.display = 'flex'
-        ..style.justifyContent = 'center'
-        ..style.alignItems = 'center';
+        ..style.display = 'block';
 
       // Create the <ins> tag
       final html.Element ins = html.Element.tag('ins')
