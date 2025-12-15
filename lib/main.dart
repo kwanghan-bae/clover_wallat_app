@@ -122,6 +122,21 @@ class _MyAppState extends State<MyApp> {
       await authService.syncWithBackend(jwtToken);
     } catch (e) {
       print('Auth sync error: $e');
+      
+      // If backend rejects the token (401), force logout to reset state
+      if (e.toString().contains('401')) {
+        await AuthService().signOut();
+        if (mounted) {
+           scaffoldMessengerKey.currentState?.showSnackBar(
+            const SnackBar(
+              content: Text('세션이 만료되었습니다. 다시 로그인해주세요.'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+
       scaffoldMessengerKey.currentState?.showSnackBar(
         SnackBar(
           content: Text('서버 동기화 실패: $e'),
