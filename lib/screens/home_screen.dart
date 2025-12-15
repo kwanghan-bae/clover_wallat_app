@@ -183,7 +183,8 @@ class DashboardTab extends StatelessWidget {
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Container(
-            height: 250, // Increased Height
+            width: double.infinity, // Ensure full width
+            height: 250, 
             decoration: BoxDecoration(
                gradient: CloverTheme.primaryGradient,
                borderRadius: BorderRadius.circular(24),
@@ -195,6 +196,7 @@ class DashboardTab extends StatelessWidget {
 
         if (snapshot.hasError || !snapshot.hasData) {
            return Container(
+            width: double.infinity, // Ensure full width
             height: 250,
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
