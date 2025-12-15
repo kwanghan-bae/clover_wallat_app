@@ -3,12 +3,15 @@ import 'dart:convert';
 import 'package:clover_wallet_app/utils/api_config.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 
+import 'package:clover_wallet_app/services/auth_service.dart';
+
 class VersionCheckService {
   Future<Map<String, dynamic>> checkVersion() async {
     try {
       // 현재 앱 버전 가져오기
       final packageInfo = await PackageInfo.fromPlatform();
       final currentVersion = packageInfo.version;
+      final token = await AuthService().getAccessToken();
       
       final url = Uri.parse('${ApiConfig.baseUrl}/api/v1/app/version?currentVersion=$currentVersion');
       
@@ -16,6 +19,7 @@ class VersionCheckService {
         url,
         headers: {
           'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
         },
       );
 

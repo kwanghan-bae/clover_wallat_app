@@ -3,12 +3,21 @@ import 'package:http/http.dart' as http;
 import 'package:clover_wallet_app/utils/api_config.dart';
 import 'package:clover_wallet_app/models/travel_plan_model.dart';
 
+import 'package:clover_wallet_app/services/auth_service.dart';
+
 class TravelApiService {
   String get baseUrl => '${ApiConfig.baseUrl}${ApiConfig.travelPlansPrefix}';
 
   Future<List<TravelPlanModel>> getAllTravelPlans() async {
     try {
-      final response = await http.get(Uri.parse(baseUrl));
+      final token = await AuthService().getAccessToken();
+      final response = await http.get(
+        Uri.parse(baseUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
       
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
@@ -24,7 +33,14 @@ class TravelApiService {
 
   Future<TravelPlanModel?> getTravelPlanById(int id) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/$id'));
+      final token = await AuthService().getAccessToken();
+      final response = await http.get(
+        Uri.parse('$baseUrl/$id'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
       
       if (response.statusCode == 200) {
         final Map<String, dynamic> responseData = json.decode(response.body);
@@ -43,7 +59,14 @@ class TravelApiService {
 
   Future<List<TravelPlanModel>> getTravelPlansByTheme(String theme) async {
     try {
-      final response = await http.get(Uri.parse('$baseUrl/theme/$theme'));
+      final token = await AuthService().getAccessToken();
+      final response = await http.get(
+        Uri.parse('$baseUrl/theme/$theme'),
+        headers: {
+          'Content-Type': 'application/json',
+          if (token != null) 'Authorization': 'Bearer $token',
+        },
+      );
       
       if (response.statusCode == 200) {
         final List<dynamic> data = json.decode(response.body);
