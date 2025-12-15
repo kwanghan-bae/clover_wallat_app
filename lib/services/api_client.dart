@@ -16,6 +16,11 @@ class AuthenticatedClient {
         // Retry with new token
         response = await requestFn(newToken);
       }
+      
+      // If still 401 after retry (or if refresh failed/returned null), force logout
+      if (response.statusCode == 401) {
+        await _authService.signOut();
+      }
     }
     return response;
   }
