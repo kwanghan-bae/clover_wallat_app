@@ -11,6 +11,9 @@ class GlassCard extends StatelessWidget {
   final VoidCallback? onTap;
   final Border? border;
 
+  final double? width;
+  final double? height;
+
   const GlassCard({
     super.key,
     required this.child,
@@ -21,11 +24,15 @@ class GlassCard extends StatelessWidget {
     this.margin,
     this.onTap,
     this.border,
+    this.width,
+    this.height,
   });
 
   @override
   Widget build(BuildContext context) {
     Widget content = Container(
+      width: width,
+      height: height,
       margin: margin,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(borderRadius),
