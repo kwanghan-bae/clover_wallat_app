@@ -21,22 +21,36 @@ class _WebAdWidgetState extends State<WebAdWidget> {
         ..id = 'ad-container-$viewId'
         ..style.width = '100%'
         ..style.height = '100%'
-        ..style.display = 'block';
+        ..style.minWidth = '300px' // Ensure minimum width prevents 0 width error
+        ..style.display = 'block'
+        ..style.overflow = 'hidden'; // Prevent overflow
 
       // Create the <ins> tag
       final html.Element ins = html.Element.tag('ins')
         ..classes.add('adsbygoogle')
         ..style.display = 'block'
+        ..style.width = '100%'
+        ..style.height = '100%'
         ..setAttribute('data-ad-client', 'ca-pub-2084827050289409')
-        // ..setAttribute('data-ad-slot', 'YOUR_AD_SLOT_ID') // Optional: Add slot ID if using specific units
         ..setAttribute('data-ad-format', 'auto')
         ..setAttribute('data-full-width-responsive', 'true');
 
       adContainer.append(ins);
 
-      // Trigger adsbygoogle push
+      // Trigger adsbygoogle push with a slight delay to ensure DOM is ready
+      // Using a microtask or small timeout in JS logic if possible, 
+      // but here we just append the script. 
+      // Safe to wrap in setTimeout in JS.
       final html.ScriptElement script = html.ScriptElement()
-        ..text = '(adsbygoogle = window.adsbygoogle || []).push({});';
+        ..text = '''
+          setTimeout(function() {
+            try {
+              (adsbygoogle = window.adsbygoogle || []).push({});
+            } catch (e) {
+              console.error("AdSense push error:", e);
+            }
+          }, 500);
+        ''';
       
       adContainer.append(script);
 
