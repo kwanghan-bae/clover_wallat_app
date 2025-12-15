@@ -49,6 +49,9 @@ jobs:
         # We assume standard project page: username.github.io/repo_name/
         run: flutter build web --release --base-href "/clover_wallet_app/"
 
+      - name: Create .nojekyll
+        run: touch build/web/.nojekyll
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
