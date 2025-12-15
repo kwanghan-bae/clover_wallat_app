@@ -51,9 +51,8 @@ class _BannerAdWidgetState extends State<BannerAdWidget> {
 
   @override
   Widget build(BuildContext context) {
-    if (kIsWeb) {
-      return const WebAdWidget();
-    }
+    // Mobile implementation doesn't need to check kIsWeb if configured correctly via conditional imports
+    // But if used directly, ensure we don't reference WebAdWidget which is not imported.
 
     if (!_isAdLoaded || _bannerAd == null) {
       // 광고가 로드되지 않았을 때 빈 공간 또는 플레이스홀더
