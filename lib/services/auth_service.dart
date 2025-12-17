@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:clover_wallet_app/utils/api_config.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:clover_wallet_app/utils/http_logger.dart';
 import 'dart:convert';
 
 class AuthService {
@@ -43,8 +44,17 @@ class AuthService {
         print('Logging in to backend: $url');
       }
       
-      final response = await http.post(
+      
+      final response = await HttpLogger.loggedRequest(
+        'POST',
         url,
+        () => http.post(
+          url,
+          headers: {
+            'Authorization': 'Bearer $supabaseJwtToken',
+            'Content-Type': 'application/json',
+          },
+        ),
         headers: {
           'Authorization': 'Bearer $supabaseJwtToken',
           'Content-Type': 'application/json',
@@ -151,9 +161,16 @@ class AuthService {
       final refreshToken = await getRefreshToken();
       if (refreshToken == null) return null;
       
+      
       final url = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.authPrefix}/refresh');
-      final response = await http.post(
+      final response = await HttpLogger.loggedRequest(
+        'POST',
         url,
+        () => http.post(
+          url,
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({'refreshToken': refreshToken}),
+        ),
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'refreshToken': refreshToken}),
       );
@@ -192,8 +209,17 @@ class AuthService {
       
       if (accessToken != null && refreshToken != null) {
         final url = Uri.parse('${ApiConfig.baseUrl}${ApiConfig.authPrefix}/logout');
-        await http.post(
+        await HttpLogger.loggedRequest(
+          'POST',
           url,
+          () => http.post(
+            url,
+            headers: {
+              'Authorization': 'Bearer $accessToken',
+              'Content-Type': 'application/json'
+            },
+            body: jsonEncode({'refreshToken': refreshToken}),
+          ),
           headers: {
             'Authorization': 'Bearer $accessToken',
             'Content-Type': 'application/json'
