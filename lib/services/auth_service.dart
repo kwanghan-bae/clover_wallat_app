@@ -52,32 +52,61 @@ class AuthService {
       );
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> body = jsonDecode(utf8.decode(response.bodyBytes));
-        
-        // Handle standard CommonResponse structure if used, or direct DTO
-        // Assuming CommonResponse<LoginResponse> based on AuthController
-        final data = body['data'] ?? body; 
-        
-        final String accessToken = data['accessToken'];
-        final String refreshToken = data['refreshToken'];
-        final Map<String, dynamic> user = data['user'];
-        final int userId = user['id'];
+        try {
+          final Map<String, dynamic> body = jsonDecode(utf8.decode(response.bodyBytes));
+          
+          if (kDebugMode) {
+            print('Backend response body: $body');
+          }
+          
+          // Handle standard CommonResponse structure if used, or direct DTO
+          final data = body['data'] ?? body;
+          
+          if (kDebugMode) {
+            print('Parsed data: $data');
+          }
+          
+          // Null-safe parsing with detailed error messages
+          final String? accessToken = data['accessToken'] as String?;
+          final String? refreshToken = data['refreshToken'] as String?;
+          final Map<String, dynamic>? user = data['user'] as Map<String, dynamic>?;
+          
+          if (accessToken == null) {
+            throw Exception('Missing accessToken in response');
+          }
+          if (refreshToken == null) {
+            throw Exception('Missing refreshToken in response');
+          }
+          if (user == null) {
+            throw Exception('Missing user object in response');
+          }
+          
+          final int? userId = user['id'] as int?;
+          if (userId == null) {
+            throw Exception('Missing user.id in response');
+          }
 
-        await _saveTokens(accessToken, refreshToken);
-        
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setInt(_userIdKey, userId);
-        
-        if (kDebugMode) {
-          print('Backend login success. UserId: $userId');
+          await _saveTokens(accessToken, refreshToken);
+          
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setInt(_userIdKey, userId);
+          
+          if (kDebugMode) {
+            print('✅ Backend login success. UserId: $userId');
+          }
+        } catch (parseError) {
+          print('❌ Error parsing backend response: $parseError');
+          print('Response body: ${response.body}');
+          rethrow;
         }
       } else {
-        throw Exception('Backend login failed: ${response.statusCode} - ${response.body}');
+        final errorMsg = 'Backend login failed: ${response.statusCode} - ${response.body}';
+        print('❌ $errorMsg');
+        throw Exception(errorMsg);
       }
-    } catch (e) {
-      if (kDebugMode) {
-        print('Backend login error: $e');
-      }
+    } catch (e, stackTrace) {
+      print('❌ Auth sync error: $e');
+      print('Stack trace: $stackTrace');
       rethrow;
     }
   }
@@ -148,8 +177,9 @@ class AuthService {
         await signOut();
         return null;
       }
-    } catch (e) {
-      print('Token refresh failed: $e');
+    } catch (e, stackTrace) {
+      print('❌ Token refresh failed: $e');
+      print('Stack trace: $stackTrace');
       return null;
     }
   }
