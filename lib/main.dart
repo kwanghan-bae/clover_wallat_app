@@ -18,6 +18,7 @@ import 'package:clover_wallet_app/screens/login_screen.dart';
 import 'package:clover_wallet_app/services/auth_service.dart';
 import 'package:clover_wallet_app/services/fcm_service.dart';
 import 'package:clover_wallet_app/services/ad_service.dart';
+import 'package:clover_wallet_app/utils/http_logger.dart';
 
 final GlobalKey<ScaffoldMessengerState> scaffoldMessengerKey = GlobalKey<ScaffoldMessengerState>();
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -46,6 +47,11 @@ void main() async {
     } catch (e) {
       print('FCM Init Error: $e');
     }
+  }
+
+  // Expose HTTP debug commands to browser console (Web only)
+  if (kIsWeb) {
+    HttpLogger.exposeToWindow();
   }
 
   // Initialize AdMob

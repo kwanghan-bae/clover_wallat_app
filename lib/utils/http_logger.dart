@@ -1,10 +1,48 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:html' as html;
 
 /// HTTP 요청/응답을 콘솔에 로깅하는 유틸리티
+/// 
+/// 보안을 위해 프로덕션에서는 기본적으로 비활성화됨.
+/// 브라우저 콘솔에서 `enableLog()` 또는 `enableLog(false)` 명령어로 토글 가능.
 class HttpLogger {
+  static bool _isEnabled = false;
+  
+  /// 로깅 활성화 여부 확인
+  static bool get isEnabled => _isEnabled;
+  
+  /// 로깅을 활성화/비활성화
+  static void setEnabled(bool enabled) {
+    _isEnabled = enabled;
+    print(enabled 
+        ? '✅ HTTP 로깅 활성화됨 (enableLog(false)로 비활성화)' 
+        : '❌ HTTP 로깅 비활성화됨 (enableLog()로 활성화)');
+  }
+  
+  /// 브라우저 window 객체에 전역 함수 노출
+  static void exposeToWindow() {
+    try {
+      // JavaScript에서 접근 가능한 전역 함수 등록
+      html.window['enableLog'] = (bool enabled) {
+        setEnabled(enabled);
+      };
+      
+      // 간편하게 파라미터 없이 호출 시 토글
+      html.window['toggleLog'] = () {
+        setEnabled(!_isEnabled);
+      };
+      
+      print('🔒 디버그 모드: 콘솔에서 enableLog() 또는 enableLog(false) 실행 가능');
+    } catch (e) {
+      // Non-web platforms에서는 무시
+    }
+  }
+  
   /// 요청 로깅
   static void logRequest(String method, Uri url, Map<String, String>? headers, Object? body) {
+    if (!_isEnabled) return;
+    
     print('🌐 HTTP $method ${url.path}');
     print('   Full URL: $url');
     
@@ -33,6 +71,8 @@ class HttpLogger {
   
   /// 응답 로깅
   static void logResponse(http.Response response, Duration elapsed) {
+    if (!_isEnabled) return;
+    
     final statusEmoji = response.statusCode >= 200 && response.statusCode < 300 ? '✅' : '❌';
     print('$statusEmoji Response [${response.statusCode}] in ${elapsed.inMilliseconds}ms');
     
@@ -66,9 +106,11 @@ class HttpLogger {
       logResponse(response, elapsed);
       return response;
     } catch (e) {
-      final elapsed = DateTime.now().difference(startTime);
-      print('❌ Request failed in ${elapsed.inMilliseconds}ms: $e');
-      print('');
+      if (_isEnabled) {
+        final elapsed = DateTime.now().difference(startTime);
+        print('❌ Request failed in ${elapsed.inMilliseconds}ms: $e');
+        print('');
+      }
       rethrow;
     }
   }
