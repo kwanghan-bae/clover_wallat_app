@@ -1,5 +1,6 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:js_util' as js_util;
 import 'dart:html' as html;
 
 /// HTTP 요청/응답을 콘솔에 로깅하는 유틸리티
@@ -23,19 +24,20 @@ class HttpLogger {
   /// 브라우저 window 객체에 전역 함수 노출
   static void exposeToWindow() {
     try {
-      // JavaScript에서 접근 가능한 전역 함수 등록
-      html.window['enableLog'] = (bool enabled) {
+      // JavaScript에서 접근 가능한 전역 함수 등록 (dart:js_util 사용)
+      js_util.setProperty(html.window, 'enableLog', js_util.allowInterop((bool enabled) {
         setEnabled(enabled);
-      };
+      }));
       
       // 간편하게 파라미터 없이 호출 시 토글
-      html.window['toggleLog'] = () {
+      js_util.setProperty(html.window, 'toggleLog', js_util.allowInterop(() {
         setEnabled(!_isEnabled);
-      };
+      }));
       
-      print('🔒 디버그 모드: 콘솔에서 enableLog() 또는 enableLog(false) 실행 가능');
+      print('🔒 디버그 모드: 콘솔에서 enableLog(true) 또는 enableLog(false) 실행 가능');
     } catch (e) {
       // Non-web platforms에서는 무시
+      print('Warning: Could not expose debug functions to window: $e');
     }
   }
   

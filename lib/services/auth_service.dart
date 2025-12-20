@@ -51,14 +51,14 @@ class AuthService {
         () => http.post(
           url,
           headers: {
-            'Authorization': 'Bearer $supabaseJwtToken',
             'Content-Type': 'application/json',
           },
+          body: jsonEncode({'supabaseToken': supabaseJwtToken}),
         ),
         headers: {
-          'Authorization': 'Bearer $supabaseJwtToken',
           'Content-Type': 'application/json',
         },
+        body: jsonEncode({'supabaseToken': supabaseJwtToken}),
       );
 
       if (response.statusCode == 200) {
